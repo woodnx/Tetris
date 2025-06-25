@@ -1,4 +1,5 @@
 CC := g++
+DXLIBDIR=dxlib
 INCDIR=include
 LIBDIR=lib
 
@@ -6,7 +7,7 @@ SRC_DIR = src
 SRCS = $(wildcard src/*.cpp)
 
 default:
-	$(CC) -g -O2 -o game -I $(INCDIR) -L $(LIBDIR) $(SRCS) \
+	$(CC) -g -O2 -o game -I $(DXLIBDIR) -L $(DXLIBDIR) $(SRCS) \
 		-lDxLib\
 		-lDxUseCLib\
 		-lDxDrawFunc\

@@ -12,7 +12,7 @@ void MinoRow::initialize() {
 int MinoRow::increase() {
   mino_arr.erase(mino_arr.begin());
 
-  //配列のサイズがNEXT_REFER_SIZE 以下なら新しくarrを作成し，連結．
+  // 配列のサイズがNEXT_REFER_SIZE 以下なら新しくarrを作成し，連結．
   if (mino_arr.size() < NEXT_REFER_SIZE) {
     std::vector<int> add_arr;
     initRow(add_arr);
@@ -27,18 +27,18 @@ int MinoRow::getMinoNum(int refer_num) {
   return mino_arr[refer_num];
 }
 
-void MinoRow::initRow(std::vector<int>& arr) {
+void MinoRow::initRow(std::vector<int> &arr) {
   arr.resize(ALL_MINO_NUM);
   for (int i = 0; i < arr.size(); i++) {
     arr[i] = i;
   }
 }
 
-void MinoRow::shuffleRow(std::vector<int>& arr) {
+void MinoRow::shuffleRow(std::vector<int> &arr) {
   for (int i = ALL_MINO_NUM - 1; i >= 0; i--) {
-    int r = GetRand(ALL_MINO_NUM - 1);
+    int r   = GetRand(ALL_MINO_NUM - 1);
     int tmp = arr[i];
-    arr[i] = arr[r];
-    arr[r] = tmp;
+    arr[i]  = arr[r];
+    arr[r]  = tmp;
   }
 }

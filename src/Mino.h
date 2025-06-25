@@ -1,13 +1,13 @@
 #pragma once
-#include "StaticMino.h"
-#include "Field.h"
-#include "include.h"
 #include "DxLib.h"
+#include "Field.h"
+#include "StaticMino.h"
+#include "include.h"
 #define LAYOUT_SIZE 4
 
 class Mino : public StaticMino {
   public:
-    Mino(Field* _field);
+    Mino(Field *_field);
 
     void initialize() override;
 
@@ -31,6 +31,6 @@ class Mino : public StaticMino {
     void drawStatus();
 
   private:
-    Field* field;
+    Field *field;
     int field_x, field_y;
 };

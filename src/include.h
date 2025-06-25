@@ -24,7 +24,7 @@ typedef enum {
 } ePad;
 
 extern int Key[256]; // キーが押されているフレーム数を格納する
-//extern int Key[28]; // キーが押されているフレーム数を格納する
+// extern int Key[28]; // キーが押されているフレーム数を格納する
 
 // キーの入力状態を更新する
 // Ex: if(Key[KEY_INPUT_RIGHT] == 1){ x++; }

@@ -72,5 +72,6 @@
     "xtree": "cpp",
     "xutility": "cpp",
     "array": "cpp"
-  }
+  },
+  "editor.formatOnSave": true
 }
