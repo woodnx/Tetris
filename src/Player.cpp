@@ -2,9 +2,11 @@
 
 Player::Player() {
   // 画像・フォントハンドル
-  background_handle = LoadGraph("images/Back_Cyber_1920.jpg");
-  index_font  = CreateFontToHandle("ニコ角", 25, 1, DX_FONTTYPE_ANTIALIASING);
-  figure_font = CreateFontToHandle("ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
+  background_handle = LoadGraph((TCHAR *) "images/Back_Cyber_1920.jpg");
+  index_font =
+      CreateFontToHandle((TCHAR *) "ニコ角", 25, 1, DX_FONTTYPE_ANTIALIASING);
+  figure_font =
+      CreateFontToHandle((TCHAR *) "ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
 
   // 各種サウンド
   sound.add("move", "sounds/カーソル移動2.mp3");
@@ -68,9 +70,11 @@ Player::Player() {
 
 Player::Player(int x, int y) {
   // 画像・フォントハンドル
-  background_handle = LoadGraph("images/Back_Cyber_1920.jpg");
-  index_font  = CreateFontToHandle("ニコ角", 25, 1, DX_FONTTYPE_ANTIALIASING);
-  figure_font = CreateFontToHandle("ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
+  background_handle = LoadGraph((TCHAR *) "images/Back_Cyber_1920.jpg");
+  index_font =
+      CreateFontToHandle((TCHAR *) "ニコ角", 25, 1, DX_FONTTYPE_ANTIALIASING);
+  figure_font =
+      CreateFontToHandle((TCHAR *) "ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
 
   // 各種サウンド
   sound.add("move", "sounds/カーソル移動2.mp3");
@@ -454,43 +458,43 @@ void Player::draw() {
   }
 
   DrawStringToHandle(
-      x - STATIC_BLOCK_SIZE * 5 + 5, y + 5, "HOLD", GetColor(255, 255, 255),
-      index_font
+      x - STATIC_BLOCK_SIZE * 5 + 5, y + 5, (TCHAR *) "HOLD",
+      GetColor(255, 255, 255), index_font
   );
   DrawStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 50 + 5, y + 5, "NEXT",
+      x + FIELD_SIDE_X * BLOCK_SIZE + 50 + 5, y + 5, (TCHAR *) "NEXT",
       GetColor(255, 255, 255), index_font
   );
   DrawStringToHandle(
       x + FIELD_SIDE_X * BLOCK_SIZE + 50, y + STATIC_BLOCK_SIZE * 6 * 3,
-      "SCORE", GetColor(255, 255, 255), index_font
+      (TCHAR *) "SCORE", GetColor(255, 255, 255), index_font
   );
   DrawFormatStringToHandle(
       x + FIELD_SIDE_X * BLOCK_SIZE + 70, y + STATIC_BLOCK_SIZE * 6 * 3 + 20,
-      GetColor(255, 255, 255), figure_font, "%d", score
+      GetColor(255, 255, 255), figure_font, (TCHAR *) "%d", score
   );
   DrawStringToHandle(
       x + FIELD_SIDE_X * BLOCK_SIZE + 50, y + STATIC_BLOCK_SIZE * 6 * 3 + 60,
-      "HIGH SCORE", GetColor(255, 255, 255), index_font
+      (TCHAR *) "HIGH SCORE", GetColor(255, 255, 255), index_font
   );
   // DrawFormatStringToHandle(x + FIELD_SIDE_X * BLOCK_SIZE + 70, y +
   // STATIC_BLOCK_SIZE * 6 * 3 + 80, GetColor(255, 255, 255), figure_font, "%d",
   // highscore);
   DrawStringToHandle(
       x + FIELD_SIDE_X * BLOCK_SIZE + 50, y + STATIC_BLOCK_SIZE * 6 * 3 + 120,
-      "LEVEL", GetColor(255, 255, 255), index_font
+      (TCHAR *) "LEVEL", GetColor(255, 255, 255), index_font
   );
   DrawFormatStringToHandle(
       x + FIELD_SIDE_X * BLOCK_SIZE + 70, y + STATIC_BLOCK_SIZE * 6 * 3 + 140,
-      GetColor(255, 255, 255), figure_font, "%d", level
+      GetColor(255, 255, 255), figure_font, (TCHAR *) "%d", level
   );
   DrawStringToHandle(
       x + FIELD_SIDE_X * BLOCK_SIZE + 50, y + STATIC_BLOCK_SIZE * 6 * 3 + 180,
-      "LINES", GetColor(255, 255, 255), index_font
+      (TCHAR *) "LINES", GetColor(255, 255, 255), index_font
   );
   DrawFormatStringToHandle(
       x + FIELD_SIDE_X * BLOCK_SIZE + 70, y + STATIC_BLOCK_SIZE * 6 * 3 + 200,
-      GetColor(255, 255, 255), figure_font, "%d", sum_linenum
+      GetColor(255, 255, 255), figure_font, (TCHAR *) "%d", sum_linenum
   );
 }
 

@@ -365,6 +365,6 @@ void Mino::drawStatus() {
   // window.y:%d", window.x, window.y); DrawFormatString(250, 20, GetColor(255,
   // 255, 255), "field_x:%d, field_y:%d", field_x, field_y);
   DrawFormatString(
-      250, 30, GetColor(255, 255, 255), "rotate_dir :%d", rotate_dir
+      250, 30, GetColor(255, 255, 255), (TCHAR *) "rotate_dir :%d", rotate_dir
   );
 }

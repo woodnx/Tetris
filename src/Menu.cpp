@@ -7,13 +7,14 @@ Menu::Menu(ISceneChanger *changer): BaseScene(changer) {
 // 初期化
 void Menu::Initialize() {
   NowSelect = eMenu_1PGame;
-  menu_font = CreateFontToHandle("ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
+  menu_font =
+      CreateFontToHandle((TCHAR *) "ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
 
-  mImageHandle      = LoadGraph("images/rogo.png"); // 画像のロード
-  background_Handle = LoadGraph("images/Menu_Back.jpg");
-  selectSE          = LoadSoundMem("sounds/カーソル移動2.mp3");
-  decisionSE        = LoadSoundMem("sounds/決定、ボタン押下26.mp3");
-  menuBGM           = LoadSoundMem("sounds/魔王魂  サイバー13.mp3");
+  mImageHandle      = LoadGraph((TCHAR *) "images/rogo.png"); // 画像のロード
+  background_Handle = LoadGraph((TCHAR *) "images/Menu_Back.jpg");
+  selectSE          = LoadSoundMem((TCHAR *) "sounds/カーソル移動2.mp3");
+  decisionSE        = LoadSoundMem((TCHAR *) "sounds/決定、ボタン押下26.mp3");
+  menuBGM           = LoadSoundMem((TCHAR *) "sounds/魔王魂  サイバー13.mp3");
   ChangeVolumeSoundMem(255 * 80 / 100, menuBGM);
   PlaySoundMem(menuBGM, DX_PLAYTYPE_BACK);
 }
@@ -36,8 +37,10 @@ void Menu::Update() {
       case eMenu_1PGame: // ゲーム選択中なら
         mSceneChanger->ChangeScene(eScene_Normal); // シーンをゲーム画面に変更
         break;
-      case eMenu_Config:                              // 設定選択中なら
-        mSceneChanger->ChangeScene(eScene_Tetlis2pi); // シーンをゲーム画面に変更
+      case eMenu_Config: // 設定選択中なら
+        mSceneChanger->ChangeScene(
+            eScene_Tetlis2pi
+        ); // シーンをゲーム画面に変更
         break;
       case eMenu_Exit: // ゲーム終了選択中なら
         DxLib_End();
@@ -55,15 +58,16 @@ void Menu::Draw() {
   // DrawString(200, 170, "上下キーを押し、エンターを押して下さい。",
   // GetColor(255, 255, 255));
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 50, GAME_Y, "NORMAL", GetColor(255, 255, 255),
-      menu_font
+      WINDOW_SIZE_X / 2 - 50, GAME_Y, (TCHAR *) "NORMAL",
+      GetColor(255, 255, 255), menu_font
   );
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 50, CONFIG_Y, "TETLIS 2π", GetColor(255, 255, 255),
-      menu_font
+      WINDOW_SIZE_X / 2 - 50, CONFIG_Y, (TCHAR *) "TETLIS 2π",
+      GetColor(255, 255, 255), menu_font
   );
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 50, EXIT_Y, "EXIT", GetColor(255, 255, 255), menu_font
+      WINDOW_SIZE_X / 2 - 50, EXIT_Y, (TCHAR *) "EXIT", GetColor(255, 255, 255),
+      menu_font
   );
   int y = 0;
   switch (NowSelect) { // 現在の選択状態に従って処理を分岐
@@ -78,6 +82,7 @@ void Menu::Draw() {
       break;
   }
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 100, y, "■", GetColor(255, 255, 255), menu_font
+      WINDOW_SIZE_X / 2 - 100, y, (TCHAR *) "■", GetColor(255, 255, 255),
+      menu_font
   );
 }
