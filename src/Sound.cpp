@@ -5,7 +5,7 @@ bool Sound::getFileNames(string directory_path, vector<string> &file_names) {
   WIN32_FIND_DATA win32fd;
   string serch_name = directory_path + "\\*";
 
-  hFind = FindFirstFile(serch_name.c_str(), &win32fd);
+  hFind = FindFirstFile((TCHAR *) serch_name.c_str(), &win32fd);
 
   if (hFind == INVALID_HANDLE_VALUE) {
     return false;
@@ -13,7 +13,19 @@ bool Sound::getFileNames(string directory_path, vector<string> &file_names) {
 
   do {
     if (!(win32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-      file_names.push_back(win32fd.cFileName);
+      int required_size = MultiByteToWideChar(
+          CP_ACP, 0, (CHAR *) win32fd.cFileName, -1, nullptr, 0
+      );
+      if (required_size > 0) {
+        std::vector<wchar_t> wbuf(required_size);
+        MultiByteToWideChar(
+            CP_ACP, 0, (CHAR *) win32fd.cFileName, -1, wbuf.data(),
+            required_size
+        );
+        std::wstring ws(wbuf.data());
+        string str(ws.begin(), ws.end());
+        file_names.push_back(str);
+      }
     }
   } while (FindNextFile(hFind, &win32fd));
 
@@ -32,7 +44,7 @@ bool Sound::isNotFullWidthChar(string file_name) {
 }
 
 int Sound::add(string handle_name, string file_path) {
-  int handle      = LoadSoundMem(file_path.c_str());
+  int handle      = LoadSoundMem((TCHAR *) file_path.c_str());
   mp[handle_name] = handle;
 
   return 0;

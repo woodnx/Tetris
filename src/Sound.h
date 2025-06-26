@@ -6,6 +6,8 @@
 #include <map>
 #include <regex>
 #include <string>
+#include <vector>
+#include <windows.h>
 
 using namespace std;
 using std::filesystem::directory_iterator;
