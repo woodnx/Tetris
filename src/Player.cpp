@@ -1,12 +1,23 @@
 #include "Player.h"
 
-Player::Player() {
+Player::Player(BaseScene* gameManager, Coordinates global):
+    global(global),
+    gameManager(gameManager),
+    field(Coordinates(global.x, global.y - BLOCK_SIZE * 4)),
+    mino(field),
+    ghost(field),
+    hold(Coordinates(
+      global.x - STATIC_BLOCK_SIZE * 4,
+      global.y + STATIC_BLOCK_SIZE * 1.5 + 10)),
+    generate_place(Coordinates((int) (FIELD_SIDE_X / 2), 4)),
+    pre_mino_place(Coordinates((int) (FIELD_SIDE_X / 2), 4)),
+    bottom(Coordinates(0, 1)) {
   // 画像・フォントハンドル
-  background_handle = LoadGraph((TCHAR *) "images/Back_Cyber_1920.jpg");
+  background_handle = LoadGraph((TCHAR*) "images/Back_Cyber_1920.jpg");
   index_font =
-      CreateFontToHandle((TCHAR *) "ニコ角", 25, 1, DX_FONTTYPE_ANTIALIASING);
+    CreateFontToHandle((TCHAR*) "ニコ角", 25, 1, DX_FONTTYPE_ANTIALIASING);
   figure_font =
-      CreateFontToHandle((TCHAR *) "ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
+    CreateFontToHandle((TCHAR*) "ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
 
   // 各種サウンド
   sound.add("move", "sounds/カーソル移動2.mp3");
@@ -14,366 +25,145 @@ Player::Player() {
   sound.add("hold", "sounds/決定、ボタン押下40.mp3");
   sound.add("drop", "sounds/カーソル移動7.mp3");
   sound.add("levelup", "sounds/魔王魂 効果音 ワンポイント11.mp3");
-
   sound.changeAllSoundVolume(70);
   sound.changeVolume("rotate", 60);
 
-  can_control = true;
+  for (int i = 0; i < NEXT_REFER_SIZE; i++) {
+    next.push_back(StaticMino(Coordinates(
+      global.x + FIELD_SIDE_X * BLOCK_SIZE + 70,
+      global.y + i * STATIC_BLOCK_SIZE * 2.8 + 35)));
+  }
+  init();
+}
 
-  // 座標
-  x = 380, y = 50;
-  gnrt_mx = FIELD_SIDE_X / 2, gnrt_my = 4;
-  pre_mino_coordx = gnrt_mx;
-  pre_mino_coordy = gnrt_my;
+void Player::init() {
+  field.init();
+  mino.init();
+  ghost.init();
+  hold.init();
 
-  // スコア・難易度
+  for (int i = 0; i < NEXT_REFER_SIZE; i++) {
+    next[i].init();
+  }
+
   level      = 1;
   score      = 0;
   ren_num    = 0;
   drop_speed = 60;
 
-  // オートリピート
-  t                = -1;
   lockdown_count   = 0;
   autorepeat_count = 0;
-  isautorepeat     = false;
+  is_autorepeat    = false;
 
-  // mino生成
-  new_gnrt_mino  = 0;
-  isbottom       = false;
-  can_generate   = false;
-  can_transcribe = false;
-  can_incrrow    = false;
-
-  // ライン削除
   erase_linenum = 0;
-  sum_linenum   = 0;
+  total_lines   = 0;
   levelup_count = 0;
 
-  // ホールド
-  hold_mino_num = -1;
-  hold_enable   = true;
-
-  field      = new Field(x, y - BLOCK_SIZE * 5);
-  mino       = new Mino(field);
-  ghost_mino = new Mino(field);
-  hold_mino  = new StaticMino(
-      x - STATIC_BLOCK_SIZE * 4, y + STATIC_BLOCK_SIZE * 1.5 + 10
-  );
-
-  for (int i = 0; i < NEXT_REFER_SIZE; i++) {
-    next_mino[i] = new StaticMino(
-        x + FIELD_SIDE_X * BLOCK_SIZE + 70, y + i * STATIC_BLOCK_SIZE * 2.8 + 35
-    );
-  }
-}
-
-Player::Player(int x, int y) {
-  // 画像・フォントハンドル
-  background_handle = LoadGraph((TCHAR *) "images/Back_Cyber_1920.jpg");
-  index_font =
-      CreateFontToHandle((TCHAR *) "ニコ角", 25, 1, DX_FONTTYPE_ANTIALIASING);
-  figure_font =
-      CreateFontToHandle((TCHAR *) "ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
-
-  // 各種サウンド
-  sound.add("move", "sounds/カーソル移動2.mp3");
-  sound.add("rotate", "sounds/決定、ボタン押下35.mp3");
-  sound.add("hold", "sounds/決定、ボタン押下40.mp3");
-  sound.add("drop", "sounds/カーソル移動7.mp3");
-  sound.add("levelup", "sounds/魔王魂 効果音 ワンポイント11.mp3");
-
-  sound.changeAllSoundVolume(70);
-  sound.changeVolume("rotate", 60);
-
+  can_hold    = true;
   can_control = true;
-
-  // 座標
-  this->x = x, this->y = y;
-  gnrt_mx = FIELD_SIDE_X / 2, gnrt_my = 4;
-  pre_mino_coordx = gnrt_mx;
-  pre_mino_coordy = gnrt_my;
-
-  // スコア・難易度
-  level      = 1;
-  score      = 0;
-  ren_num    = 0;
-  drop_speed = 60;
-
-  // オートリピート
-  t                = -1;
-  lockdown_count   = 0;
-  autorepeat_count = 0;
-  isautorepeat     = false;
-
-  // mino生成
-  new_gnrt_mino  = 0;
-  isbottom       = false;
-  can_generate   = false;
-  can_transcribe = false;
-  can_incrrow    = false;
-
-  // ライン削除
-  erase_linenum = 0;
-  sum_linenum   = 0;
-  levelup_count = 0;
-
-  // ホールド
-  hold_mino_num = -1;
-  hold_enable   = true;
-
-  field      = new Field(x, y - BLOCK_SIZE * 5);
-  mino       = new Mino(field);
-  ghost_mino = new Mino(field);
-  hold_mino  = new StaticMino(
-      x - STATIC_BLOCK_SIZE * 4, y + STATIC_BLOCK_SIZE * 1.5 + 10
-  );
-
-  for (int i = 0; i < NEXT_REFER_SIZE; i++) {
-    next_mino[i] = new StaticMino(
-        x + FIELD_SIDE_X * BLOCK_SIZE + 70, y + i * STATIC_BLOCK_SIZE * 2.8 + 35
-    );
-  }
 }
 
-void Player::initialize() {
-  // 主要クラス
-  mino->initialize();
-  field->initialize();
-  row.initialize();
-  ghost_mino->initialize();
-  hold_mino->initialize();
+void Player::move_mino(bool is_right) {
+  Coordinates vector(is_right ? 1 : -1, 0);
 
-  for (int i = 0; i < NEXT_REFER_SIZE; i++) {
-    next_mino[i]->initialize();
-  }
-
-  can_control = true;
-
-  // 難易度
-  level      = 1;
-  score      = 0;
-  ren_num    = 0;
-  drop_speed = 60;
-
-  // オートリピート
-  t                = -1;
-  lockdown_count   = 0;
-  autorepeat_count = 0;
-  isautorepeat     = false;
-
-  // mino生成
-  new_gnrt_mino  = 0;
-  isbottom       = false;
-  can_generate   = false;
-  can_transcribe = false;
-  can_incrrow    = false;
-
-  // ライン消去
-  erase_linenum = 0;
-  sum_linenum   = 0;
-  levelup_count = 0;
-
-  // ホールド
-  hold_mino_num = -1;
-  hold_enable   = true;
-}
-
-void Player::startProcess() {
-  mino->generateMinoWithPos(row.getMinoNum(0), gnrt_mx, gnrt_my);
-  row.increase();
-}
-
-void Player::update() {
-  installMino();
-  dropMino();
-  holdMino();
-  makeGhost();
-  setNext();
-
-  if (can_control)
-    controlMino();
-
-  t++;
-}
-
-void Player::controlMino() {
-  // 左右移動操作
-  // PAD PAD_LEFT
-  if (Key[KEY_INPUT_A] >= 1) {
-    moveMino(false);
-  }
-  // PAD PAD_RIGHT
-  if (Key[KEY_INPUT_D] >= 1) {
-    moveMino(true);
-  }
-
-  // 回転操作（SRS付き）
-  // PAD PAD_4
-  if (Key[KEY_INPUT_L] == 1) {
-    mino->rotateMinoWithCollision(true);
-    sound.play("rotate", DX_PLAYTYPE_BACK);
-    lockdown_count = 0;
-  }
-  // PAD PAD_3
-  if (Key[KEY_INPUT_K] == 1) {
-    mino->rotateMinoWithCollision(false);
-    sound.play("rotate", DX_PLAYTYPE_BACK);
-    lockdown_count = 0;
-  }
-
-  if (!CheckHitKeyAll(DX_CHECKINPUT_KEY)) {
-    autorepeat_count = 0;
-    isautorepeat     = false;
-  }
-}
-
-void Player::moveMino(bool is_right) {
-  const int m = is_right ? 1 : -1;
-
-  if (mino->getMinoCoordX() != pre_mino_coordx &&
-      mino->getMinoCoordY() != pre_mino_coordy) {
+  if (
+    mino.global_coord().x != pre_mino_place.x &&
+    mino.global_coord().y != pre_mino_place.y) {
     lockdown_count = 0;
   }
 
   if (autorepeat_count == 0) {
-    if (!mino->collisionField(m, 0)) {
-      mino->moveMino(m, 0);
-      sound.play("move", DX_PLAYTYPE_BACK);
-    }
+    mino.move(vector, true);
+    sound.play("move", DX_PLAYTYPE_BACK);
     autorepeat_count++;
-  }
-  else if (isautorepeat && t % 3 == 0) {
-    if (!mino->collisionField(m, 0)) {
-      mino->moveMino(m, 0);
-      sound.play("move", DX_PLAYTYPE_BACK);
-    }
-  }
-  else if (autorepeat_count == 9) {
-    isautorepeat = true;
-  }
-  else {
+  } else if (is_autorepeat && gameManager->frame_count() % 3 == 0) {
+    mino.move(vector, true);
+    sound.play("move", DX_PLAYTYPE_BACK);
+  } else if (autorepeat_count == 9) {
+    is_autorepeat = true;
+  } else {
     autorepeat_count++;
   }
 }
 
-void Player::dropMino() {
-  // PAD PAD_UP
-  if (Key[KEY_INPUT_W] == 1) { // ハードドロップ
-    mino->dropToMaxBottom();
-    new_gnrt_mino  = row.getMinoNum(0);
-    can_generate   = true;
-    can_transcribe = true;
-    can_incrrow    = true;
-    hold_enable    = true;
-  } // PAD PAD_DOWN
-  else if (Key[KEY_INPUT_S] >= 1 && t % 3 == 0) { // ソフトドロップ
-    if (!mino->collisionField(0, 1)) {
-      mino->moveMino(0, 1);
-      sound.play("move", DX_PLAYTYPE_BACK);
-    }
-    else {
-      isbottom = true;
-    }
-  }
-  else if (t % drop_speed == 0) { // ナチュラルドロップ
-    if (!mino->collisionField(0, 1)) {
-      mino->moveMino(0, 1);
-      isbottom = false;
-    }
-    else {
-      isbottom        = true;
-      pre_mino_coordx = mino->getMinoCoordX();
-      pre_mino_coordy = mino->getMinoCoordY();
-    }
-  }
+void Player::rotate_mino(bool is_right) {
+  mino.rotate(is_right);
+  lockdown_count = 0;
+}
 
-  if (isbottom) {
-    if (lockdown_count == 30) {
-      new_gnrt_mino  = row.getMinoNum(0);
-      can_generate   = true;
-      can_transcribe = true;
-      can_incrrow    = true;
-      hold_enable    = true;
+void Player::hard_drop() {
+  mino.hard_drop();
+  generate_mino(bag.increase(), true);
+  can_hold = true;
+}
 
-      lockdown_count = 0;
+void Player::soft_drop() {
+  Coordinates vector(0, 1);
 
-      isbottom = false;
-    }
-    else if (!mino->collisionField(0, 1)) {
-      can_generate   = false;
-      can_transcribe = false;
-      can_incrrow    = false;
-
-      lockdown_count = 0;
-
-      isbottom = false;
-    }
-    else {
-      lockdown_count++;
-    }
+  if (!mino.collision(vector)) {
+    mino.move(vector);
+  } else {
+    pre_mino_place = mino.global_coord();
   }
 }
 
-void Player::holdMino() {
-  // PAD Key[PAD_5] == 1 || Key[PAD_7] == 1
-  if (Key[KEY_INPUT_SPACE] && hold_enable) {
+void Player::hold_mino() {
+  if (can_hold) {
+    shared_ptr<BlockId> tmp_hold_mino_id = hold.id();
+    hold.generate(mino.id());
+
     sound.play("hold", DX_PLAYTYPE_BACK);
-    if (hold_mino_num == -1) {
-      hold_mino_num = mino->getMinoNum();
-      hold_mino->generateMino(hold_mino_num);
-
-      new_gnrt_mino  = row.getMinoNum(0);
-      can_generate   = true;
-      can_transcribe = false;
-      can_incrrow    = true;
+    if (tmp_hold_mino_id == BlockId::Null) {
+      generate_mino(bag.increase(), false);
+    } else {
+      generate_mino(tmp_hold_mino_id, false);
     }
-    else {
-      int tmp_mino_num = hold_mino_num;
-      hold_mino_num    = mino->getMinoNum();
-      hold_mino->generateMino(hold_mino_num);
 
-      new_gnrt_mino  = tmp_mino_num;
-      can_generate   = true;
-      can_transcribe = false;
-      can_incrrow    = false;
-    }
-    hold_enable = false;
+    can_hold = false;
   }
 }
 
-void Player::makeGhost() {
-  *ghost_mino = *mino;
-  ghost_mino->dropToMaxBottom();
+void Player::make_ghost() {
+  ghost = mino;
+  ghost.hard_drop();
 }
 
-void Player::setNext() {
-  for (int i = 0; i < NEXT_REFER_SIZE; i++) {
-    next_mino[i]->generateMino(row.getMinoNum(i));
+void Player::set_next() {
+  for (int i = 0; i < Bag::NEXT_REFERS; i++) {
+    next[i].generate(bag.getMinoId(i));
   }
 }
 
-int Player::calcScore(int _level, int _drop_speed) {
+void Player::generate_mino(shared_ptr<BlockId> mino_id, bool is_transcribe) {
+  if (is_transcribe) {
+    mino.transcribe();
+  }
+  mino.generate(mino_id, generate_place);
+
+  set_next();
+}
+
+int Player::calc_score() {
   int _score = 0;
 
-  int tmp_erase_linenum = erase_linenum;
-  erase_linenum         = this->eraseAndShitLine();
+  int tmp_erase_lines = erase_linenum;
+  erase_linenum       = field.erase_lines();
 
-  if (tmp_erase_linenum != 0 && erase_linenum != 0)
+  if (tmp_erase_lines != 0 && erase_linenum != 0)
     ren_num++;
 
-  int drop_score = (20 * _drop_speed / 60 - t / 60);
-  int line_score = _level * 100 * erase_linenum;
+  int drop_score = (20 * drop_speed / 60 - gameManager->frame_count() / 60);
+  int line_score = level * 100 * erase_linenum;
 
   _score = (drop_score + line_score) * (ren_num + 1);
 
   return _score;
 }
 
-void Player::levelControl() {
+void Player::level_control() {
   int tmp_level = level;
-  sum_linenum += erase_linenum;
-  level = sum_linenum / 10 + 1;
+  total_lines += erase_linenum;
+  level = total_lines / 10 + 1;
   if (level != tmp_level) {
     sound.play("levelup", DX_PLAYTYPE_BACK);
     if (drop_speed != 1) {
@@ -382,132 +172,145 @@ void Player::levelControl() {
   }
 }
 
-void Player::installMino() {
-  if (can_generate) {
-    if (can_transcribe) {
-      sound.play("drop", DX_PLAYTYPE_BACK);
-      mino->transcribeMinoToField();
-    }
-
-    mino->generateMinoWithPos(new_gnrt_mino, gnrt_mx, gnrt_my);
-
-    if (can_incrrow)
-      row.increase();
-
-    score += calcScore(level, drop_speed);
-
-    levelControl();
-    erase_linenum = 0;
-
-    can_generate   = false;
-    can_transcribe = false;
-    can_incrrow    = false;
-    t              = 0;
-  }
+void Player::start_game() {
+  init();
+  generate_mino(bag.increase(), false);
+  hold.generate(BlockId::Empty);
 }
 
-int Player::judgeGameResult() {
-  if (field->containMino(gnrt_mx, gnrt_my) ||
-      field->containMino(gnrt_mx + 1, gnrt_my)) {
+int Player::judge_game() {
+  if (
+    field.contain_mino(generate_place) ||
+    field.contain_mino(Coordinates(generate_place.x + 1, generate_place.y))) {
     return -1;
-  }
-  else if (sum_linenum >= max_linenum) {
+  } else if (total_lines >= max_lines) {
     return 1;
   }
 
   return 0;
 }
 
-int Player::eraseAndShitLine() {
-  int erase_linenum = 0;
-  for (int i = 1; i <= FIELD_SIDE_Y; i++) {
-    if (field->judgeLineFull(i)) {
-      field->eraseLine(i);
-      field->shiftLine(i);
-      erase_linenum++;
-    }
+int Player::update(bool key_pressed) {
+  if (!key_pressed) {
+    autorepeat_count = 0;
+    is_autorepeat    = false;
   }
-  return erase_linenum;
+
+  if (mino.collision(bottom)) {
+    if (lockdown_count >= 30) {
+      lockdown_count = 0;
+      generate_mino(bag.increase(), true);
+
+      can_hold = true;
+    }
+    lockdown_count++;
+  }
+
+  make_ghost();
+  calc_score();
+
+  return judge_game();
 }
 
 void Player::draw() {
   DrawGraph(0, 0, background_handle, TRUE);
-  int drx = x - STATIC_BLOCK_SIZE * 5, dry = y;
+  int drx = global.x - STATIC_BLOCK_SIZE * 5, dry = global.y;
   DrawRoundRect(
-      drx, dry, drx + STATIC_BLOCK_SIZE * 5 + 10,
-      dry + STATIC_BLOCK_SIZE * 4 + 10, 10, 10, GetColor(0, 0, 0), TRUE
-  );
-  drx = x + FIELD_SIDE_X * BLOCK_SIZE + 50, dry = y;
+    drx,
+    dry,
+    drx + STATIC_BLOCK_SIZE * 5 + 10,
+    dry + STATIC_BLOCK_SIZE * 4 + 10,
+    10,
+    10,
+    GetColor(0, 0, 0),
+    TRUE);
+  drx = global.x + FIELD_SIDE_X * BLOCK_SIZE + 50, dry = global.y;
   DrawRoundRect(
-      drx, dry, drx + STATIC_BLOCK_SIZE * 5 + 10,
-      dry + STATIC_BLOCK_SIZE * 6 * 3, 10, 10, GetColor(0, 0, 0), TRUE
-  );
+    drx,
+    dry,
+    drx + STATIC_BLOCK_SIZE * 5 + 10,
+    dry + STATIC_BLOCK_SIZE * 6 * 3,
+    10,
+    10,
+    GetColor(0, 0, 0),
+    TRUE);
 
-  field->drawField();
-  ghost_mino->draw(false);
-  mino->draw(true);
-  if (hold_enable) {
-    hold_mino->draw(true);
-  }
-  else {
-    hold_mino->draw(true, 100);
+  field.draw();
+  ghost.draw(false);
+  mino.draw(true);
+  if (can_hold) {
+    hold.draw(true);
+  } else {
+    hold.draw(true, 100);
   }
 
   for (int i = 0; i < NEXT_REFER_SIZE; i++) {
-    next_mino[i]->draw(true);
+    next[i].draw(true);
   }
 
   DrawStringToHandle(
-      x - STATIC_BLOCK_SIZE * 5 + 5, y + 5, (TCHAR *) "HOLD",
-      GetColor(255, 255, 255), index_font
-  );
+    global.x - STATIC_BLOCK_SIZE * 5 + 5,
+    global.y + 5,
+    (TCHAR*) "HOLD",
+    GetColor(255, 255, 255),
+    index_font);
   DrawStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 50 + 5, y + 5, (TCHAR *) "NEXT",
-      GetColor(255, 255, 255), index_font
-  );
+    global.x + FIELD_SIDE_X * BLOCK_SIZE + 50 + 5,
+    global.y + 5,
+    (TCHAR*) "NEXT",
+    GetColor(255, 255, 255),
+    index_font);
   DrawStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 50, y + STATIC_BLOCK_SIZE * 6 * 3,
-      (TCHAR *) "SCORE", GetColor(255, 255, 255), index_font
-  );
+    global.x + FIELD_SIDE_X * BLOCK_SIZE + 50,
+    global.y + STATIC_BLOCK_SIZE * 6 * 3,
+    (TCHAR*) "SCORE",
+    GetColor(255, 255, 255),
+    index_font);
   DrawFormatStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 70, y + STATIC_BLOCK_SIZE * 6 * 3 + 20,
-      GetColor(255, 255, 255), figure_font, (TCHAR *) "%d", score
-  );
+    global.x + FIELD_SIDE_X * BLOCK_SIZE + 70,
+    global.y + STATIC_BLOCK_SIZE * 6 * 3 + 20,
+    GetColor(255, 255, 255),
+    figure_font,
+    (TCHAR*) "%d",
+    score);
   DrawStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 50, y + STATIC_BLOCK_SIZE * 6 * 3 + 60,
-      (TCHAR *) "HIGH SCORE", GetColor(255, 255, 255), index_font
-  );
+    global.x + FIELD_SIDE_X * BLOCK_SIZE + 50,
+    global.y + STATIC_BLOCK_SIZE * 6 * 3 + 60,
+    (TCHAR*) "HIGH SCORE",
+    GetColor(255, 255, 255),
+    index_font);
   // DrawFormatStringToHandle(x + FIELD_SIDE_X * BLOCK_SIZE + 70, y +
-  // STATIC_BLOCK_SIZE * 6 * 3 + 80, GetColor(255, 255, 255), figure_font, "%d",
-  // highscore);
+  // STATIC_BLOCK_SIZE * 6 * 3 + 80, GetColor(255, 255, 255), figure_font,
+  // "%d", highscore);
   DrawStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 50, y + STATIC_BLOCK_SIZE * 6 * 3 + 120,
-      (TCHAR *) "LEVEL", GetColor(255, 255, 255), index_font
-  );
+    global.x + FIELD_SIDE_X * BLOCK_SIZE + 50,
+    global.y + STATIC_BLOCK_SIZE * 6 * 3 + 120,
+    (TCHAR*) "LEVEL",
+    GetColor(255, 255, 255),
+    index_font);
   DrawFormatStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 70, y + STATIC_BLOCK_SIZE * 6 * 3 + 140,
-      GetColor(255, 255, 255), figure_font, (TCHAR *) "%d", level
-  );
+    global.x + FIELD_SIDE_X * BLOCK_SIZE + 70,
+    global.y + STATIC_BLOCK_SIZE * 6 * 3 + 140,
+    GetColor(255, 255, 255),
+    figure_font,
+    (TCHAR*) "%d",
+    level);
   DrawStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 50, y + STATIC_BLOCK_SIZE * 6 * 3 + 180,
-      (TCHAR *) "LINES", GetColor(255, 255, 255), index_font
-  );
+    global.x + FIELD_SIDE_X * BLOCK_SIZE + 50,
+    global.y + STATIC_BLOCK_SIZE * 6 * 3 + 180,
+    (TCHAR*) "LINES",
+    GetColor(255, 255, 255),
+    index_font);
   DrawFormatStringToHandle(
-      x + FIELD_SIDE_X * BLOCK_SIZE + 70, y + STATIC_BLOCK_SIZE * 6 * 3 + 200,
-      GetColor(255, 255, 255), figure_font, (TCHAR *) "%d", sum_linenum
-  );
+    global.x + FIELD_SIDE_X * BLOCK_SIZE + 70,
+    global.y + STATIC_BLOCK_SIZE * 6 * 3 + 200,
+    GetColor(255, 255, 255),
+    figure_font,
+    (TCHAR*) "%d",
+    total_lines);
 }
 
 void Player::finalize() {
-  delete (mino);
-  delete (field);
-  delete (ghost_mino);
-  delete (hold_mino);
-
   InitFontToHandle();
   sound.finalize();
-
-  for (int i = 0; i < NEXT_REFER_SIZE; i++) {
-    delete (next_mino[i]);
-  }
 }

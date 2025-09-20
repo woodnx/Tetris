@@ -4,10 +4,18 @@ INCDIR=include
 LIBDIR=lib
 
 SRC_DIR = src
-SRCS = $(wildcard src/*.cpp)
+OBJ_DIR = obj
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
-default:
-	$(CC) -g -O2 -o game -I $(DXLIBDIR) -L $(DXLIBDIR) $(SRCS) \
+default: $(OBJ_DIR) game
+
+$(OBJ_DIR):
+	@if not exist "$(OBJ_DIR)" mkdir "$(OBJ_DIR)"
+
+game: $(OBJS)
+	$(CC) -std=c++17 -g -O0 -o game $(OBJS) \
+		-L $(DXLIBDIR) \
 		-lDxLib\
 		-lDxUseCLib\
 		-lDxDrawFunc\
@@ -27,3 +35,12 @@ default:
 		-lsilk_common\
 		-lcelt\
 		-mwindows
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CC) -g -O0 -c $< -o $@ -I $(DXLIBDIR)
+
+.PHONY: clean
+clean:
+	@if exist "$(OBJ_DIR)" rmdir /S /Q "$(OBJ_DIR)"
+	@if exist game.exe del /F /Q game.exe
+	@if exist game del /F /Q game

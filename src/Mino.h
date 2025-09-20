@@ -1,36 +1,40 @@
 #pragma once
+#include "BlockId.h"
 #include "DxLib.h"
 #include "Field.h"
 #include "StaticMino.h"
 #include "include.h"
+
+#include <memory>
+
 #define LAYOUT_SIZE 4
+
+using namespace std;
 
 class Mino : public StaticMino {
   public:
-    Mino(Field *_field);
+    // static int const LATOUT_SIZE = 4;
 
-    void initialize() override;
+    Mino(Field& field);
+    Mino& operator=(const Mino& other);
+    void init() override;
 
-    int getMinoNum();
-    int getMinoCoordX();
-    int getMinoCoordY();
+    Coordinates global_coord();
 
-    void generateMinoWithPos(int generate_mino_num, int field_x, int field_y);
+    void generate(shared_ptr<BlockId> generate_mino_num, Coordinates local);
+    bool collision();
+    bool collision(Coordinates diff);
 
-    void rotateMinoWithCollision(bool right_flag);
-    bool superRotation(int dir_old, bool right_flag);
+    void rotate(bool right_flag);
+    bool super_rotate(int dir_old, bool right_flag);
 
-    void moveMino(int dx, int dy);
-    void moveMinoWithCollision(int dx, int dy);
-    void dropToMaxBottom();
+    void move(Coordinates d, bool with_collision = false);
+    void hard_drop();
 
-    bool collisionField();
-    bool collisionField(int dx, int dy);
-
-    void transcribeMinoToField();
-    void drawStatus();
+    void transcribe();
+    void draw_status();
 
   private:
-    Field *field;
-    int field_x, field_y;
+    Field& field;
+    Coordinates local;
 };

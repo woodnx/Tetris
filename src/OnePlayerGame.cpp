@@ -1,7 +1,8 @@
 #include "OnePlayerGame.h"
 
-OnePlayerGame::OnePlayerGame(ISceneChanger *changer): BaseScene(changer) {
-  player = new Player();
+OnePlayerGame::OnePlayerGame(ISceneChanger* changer):
+    BaseScene(changer),
+    player(this, Coordinates(380, 50)) {
   sound.add("select", "sounds/カーソル移動2.mp3");
   sound.add("dicision", "sounds/決定、ボタン押下26.mp3");
   sound.changeAllSoundVolume(70);
@@ -13,9 +14,8 @@ OnePlayerGame::OnePlayerGame(ISceneChanger *changer): BaseScene(changer) {
   is_count      = true;
   is_gamestart  = true;
   count         = 3;
-  auto fontname = (TCHAR *) "ニコ角";
+  auto fontname = (TCHAR*) "ニコ角";
   count_font    = CreateFontToHandle(fontname, 75, 1, DX_FONTTYPE_ANTIALIASING);
-  t             = 0;
 
   // ポーズ関連
   is_pause   = false;
@@ -35,13 +35,14 @@ OnePlayerGame::OnePlayerGame(ISceneChanger *changer): BaseScene(changer) {
 }
 
 void OnePlayerGame::Initialize() {
-  player->initialize();
+  player.init();
+
+  key_pressed = false;
 
   // カウントダウン関連
   is_count     = true;
   is_gamestart = true;
   count        = 3;
-  t            = 0;
 
   // ポーズ関連
   is_pause   = false;
@@ -60,22 +61,52 @@ void OnePlayerGame::Update() {
     is_pause = true;
   }
 
-  int game_result = player->judgeGameResult();
-
   if (is_count)
     countDown();
   else if (is_pause)
     pause();
   else if (game_result != 0)
     gameResultScene();
-  else
-    player->update();
+  else {
+    if (Key[KEY_INPUT_A] >= 1) {
+      player.move_mino(false);
+      key_pressed = true;
+    } else if (Key[KEY_INPUT_D] >= 1) {
+      player.move_mino(true);
+      key_pressed = true;
+    } else if (Key[KEY_INPUT_S] >= 1) {
+      player.soft_drop();
+      key_pressed = true;
+    } else {
+      key_pressed = false;
+    }
+
+    if (Key[KEY_INPUT_L] == 1) {
+      player.rotate_mino(false);
+    } else if (Key[KEY_INPUT_K] == 1) {
+      player.rotate_mino(false);
+    }
+
+    if (Key[KEY_INPUT_W] == 1) {
+      player.hard_drop();
+    }
+
+    if (Key[KEY_INPUT_SPACE] == 1) {
+      player.hold_mino();
+    }
+
+    if (frame_count() % player.drop_speed == 0) {
+      player.soft_drop();
+    }
+
+    game_result = player.update(key_pressed);
+  }
+
+  BaseScene::Update();
 }
 
 void OnePlayerGame::Draw() {
-  int game_result = player->judgeGameResult();
-
-  player->draw();
+  player.draw();
 
   if (is_count)
     countDownDraw();
@@ -86,26 +117,25 @@ void OnePlayerGame::Draw() {
 }
 
 void OnePlayerGame::Finalize() {
-  player->finalize();
+  player.finalize();
 }
 
 void OnePlayerGame::countDown() {
-  if (t % 45 == 0) {
+  if (frame_count() % 60 == 0) {
     // sound.play("count", DX_PLAYTYPE_BACK);
     count--;
   }
   if (count < 0) {
     is_count = false;
     count    = 3;
-    t        = 0;
+    reset_frame_count();
     sound.play("bgm", DX_PLAYTYPE_LOOP);
 
     if (is_gamestart) {
-      player->startProcess();
+      player.start_game();
     }
     is_gamestart = false;
   }
-  t++;
 }
 
 void OnePlayerGame::countDownDraw() {
@@ -114,15 +144,19 @@ void OnePlayerGame::countDownDraw() {
   SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードをオフ
   if (count > 0) {
     DrawFormatStringToHandle(
-        WINDOW_SIZE_X / 2, WINDOW_SIZE_Y / 2 - 50, GetColor(255, 255, 255),
-        count_font, (TCHAR *) "%d", count
-    );
-  }
-  else
+      WINDOW_SIZE_X / 2,
+      WINDOW_SIZE_Y / 2 - 50,
+      GetColor(255, 255, 255),
+      count_font,
+      (TCHAR*) "%d",
+      count);
+  } else
     DrawStringToHandle(
-        WINDOW_SIZE_X / 2 - 100, WINDOW_SIZE_Y / 2 - 50, (TCHAR *) "START",
-        GetColor(255, 255, 255), count_font
-    );
+      WINDOW_SIZE_X / 2 - 100,
+      WINDOW_SIZE_Y / 2 - 50,
+      (TCHAR*) "START",
+      GetColor(255, 255, 255),
+      count_font);
 }
 
 void OnePlayerGame::pause() {
@@ -133,7 +167,7 @@ void OnePlayerGame::pause() {
   if (Key[KEY_INPUT_W] == 1) { // 上キーが押されていたら
     sound.play("select", DX_PLAYTYPE_BACK);
     now_select =
-        (now_select + (ePause_Num - 1)) % ePause_Num; // 選択状態を一つ上げる
+      (now_select + (ePause_Num - 1)) % ePause_Num; // 選択状態を一つ上げる
   }
   if (Key[KEY_INPUT_SPACE] == 1) { // エンターキーが押されたら
     sound.play("dicision", DX_PLAYTYPE_BACK);
@@ -144,7 +178,7 @@ void OnePlayerGame::pause() {
         break;
       case ePause_Restart:
         Initialize();
-        player->initialize();
+        player.init();
         break;
       case ePause_End: // 設定選択中なら
         mSceneChanger->ChangeScene(eScene_Menu);
@@ -159,17 +193,23 @@ void OnePlayerGame::pauseDraw() {
   SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードをオフ
 
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 50, 300, (TCHAR *) "つづける",
-      GetColor(255, 255, 255), pause_font
-  );
+    WINDOW_SIZE_X / 2 - 50,
+    300,
+    (TCHAR*) "つづける",
+    GetColor(255, 255, 255),
+    pause_font);
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 50, 300 + 70, (TCHAR *) "やりなおす",
-      GetColor(255, 255, 255), pause_font
-  );
+    WINDOW_SIZE_X / 2 - 50,
+    300 + 70,
+    (TCHAR*) "やりなおす",
+    GetColor(255, 255, 255),
+    pause_font);
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 50, 300 + 70 * 2, (TCHAR *) "やめる",
-      GetColor(255, 255, 255), pause_font
-  );
+    WINDOW_SIZE_X / 2 - 50,
+    300 + 70 * 2,
+    (TCHAR*) "やめる",
+    GetColor(255, 255, 255),
+    pause_font);
 
   switch (now_select) {   // 現在の選択状態に従って処理を分岐
     case ePause_Continue: // コンティニュー選択中
@@ -184,9 +224,11 @@ void OnePlayerGame::pauseDraw() {
       break;
   }
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 100, pause_y, (TCHAR *) "■", GetColor(255, 255, 255),
-      pause_font
-  );
+    WINDOW_SIZE_X / 2 - 100,
+    pause_y,
+    (TCHAR*) "■",
+    GetColor(255, 255, 255),
+    pause_font);
 }
 
 void OnePlayerGame::gameResultScene() {
@@ -199,14 +241,14 @@ void OnePlayerGame::gameResultScene() {
   if (Key[KEY_INPUT_W] == 1) { // 上キーが押されていたら
     sound.play("select", DX_PLAYTYPE_BACK);
     now_select =
-        (now_select + (eResult_Num - 1)) % eResult_Num; // 選択状態を一つ上げる
+      (now_select + (eResult_Num - 1)) % eResult_Num; // 選択状態を一つ上げる
   }
   if (Key[KEY_INPUT_SPACE] == 1) { // エンターキーが押されたら
     sound.play("dicision", DX_PLAYTYPE_BACK);
     switch (now_select) {
       case eResult_Restart:
         Initialize();
-        player->initialize();
+        player.init();
         break;
       case eResult_End:
         mSceneChanger->ChangeScene(eScene_Menu);
@@ -234,25 +276,32 @@ void OnePlayerGame::gameResultDraw(int game_result) {
     //    GetColor(255, 255, 255), pause_font);
     //}
     DrawStringToHandle(
-        WINDOW_SIZE_X / 2 - 200, 100, (TCHAR *) "GAME CLEAR",
-        GetColor(255, 255, 255), count_font
-    );
-  }
-  else if (game_result == -1) {
+      WINDOW_SIZE_X / 2 - 200,
+      100,
+      (TCHAR*) "GAME CLEAR",
+      GetColor(255, 255, 255),
+      count_font);
+  } else if (game_result == -1) {
     DrawStringToHandle(
-        WINDOW_SIZE_X / 2 - 200, 100, (TCHAR *) "GAME OVER",
-        GetColor(255, 255, 255), count_font
-    );
+      WINDOW_SIZE_X / 2 - 200,
+      100,
+      (TCHAR*) "GAME OVER",
+      GetColor(255, 255, 255),
+      count_font);
   }
 
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 50, 300, (TCHAR *) "もういちど遊ぶ",
-      GetColor(255, 255, 255), pause_font
-  );
+    WINDOW_SIZE_X / 2 - 50,
+    300,
+    (TCHAR*) "もういちど遊ぶ",
+    GetColor(255, 255, 255),
+    pause_font);
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 50, 300 + 70, (TCHAR *) "メニューに戻る",
-      GetColor(255, 255, 255), pause_font
-  );
+    WINDOW_SIZE_X / 2 - 50,
+    300 + 70,
+    (TCHAR*) "メニューに戻る",
+    GetColor(255, 255, 255),
+    pause_font);
 
   switch (now_select) {   // 現在の選択状態に従って処理を分岐
     case eResult_Restart: // ゲーム選択中なら
@@ -263,7 +312,9 @@ void OnePlayerGame::gameResultDraw(int game_result) {
       break;
   }
   DrawStringToHandle(
-      WINDOW_SIZE_X / 2 - 100, pause_y, (TCHAR *) "■", GetColor(255, 255, 255),
-      pause_font
-  );
+    WINDOW_SIZE_X / 2 - 100,
+    pause_y,
+    (TCHAR*) "■",
+    GetColor(255, 255, 255),
+    pause_font);
 }

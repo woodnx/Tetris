@@ -6,7 +6,7 @@
 
 class SceneMgr : public ISceneChanger, Task {
   private:
-    BaseScene *mScene; // シーン管理変数
+    BaseScene* mScene; // シーン管理変数
     eScene mNextScene; // 次のシーン管理変数
 
   public:

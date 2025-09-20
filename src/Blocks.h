@@ -1,26 +1,12 @@
 #pragma once
+#include "BlockID.h"
+#include "Coordinates.h"
 #include "DxLib.h"
 
+#include <memory>
 #include <vector>
 
 using namespace std;
-
-struct Position {
-    int x;
-    int y;
-};
-
-enum BlockValue {
-  Empty,
-  Imino,
-  Lmino,
-  Jmino,
-  Smino,
-  Zmino,
-  Omino,
-  Tmino,
-  Wall
-};
 
 class Blocks {
   private:
@@ -28,8 +14,8 @@ class Blocks {
     unsigned int _size;
 
   protected:
-    vector<vector<int>> layout;
-    Position window;
+    vector<vector<shared_ptr<BlockId>>> layout;
+    Coordinates global;
     int rotate_dir;
 
     // Gettor
@@ -37,15 +23,16 @@ class Blocks {
     unsigned int height();
     unsigned int block_size();
 
-    int initLayout(unsigned int width, unsigned int height);
-    int fillLayout(int value);
-    int selectColor(int color_num);
+    void init_layout(unsigned int width, unsigned int height);
+    void fill_layout(shared_ptr<BlockId> fill_id);
+    vector<vector<shared_ptr<BlockId>>> copy_layout();
 
   public:
     Blocks(
-        Position window, unsigned int width, unsigned int height,
-        unsigned int size
-    );
+      Coordinates global,
+      unsigned int width,
+      unsigned int height,
+      unsigned int size);
     int rotate(bool right_flag);
 
     int draw(bool fill_flag);

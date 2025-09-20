@@ -1,4 +1,9 @@
 #pragma once
+#include "Bag.h"
+#include "BaseScene.h"
+#include "BlockId.h"
+#include "Coordinates.h"
+#include "Dxlib.h"
 #include "Field.h"
 #include "Mino.h"
 #include "MinoRow.h"
@@ -6,30 +11,15 @@
 #include "StaticMino.h"
 #include "include.h"
 
-typedef enum {
-  ePause_Continue, // 続ける
-  ePause_Restart,  // やりなおす
-  ePause_End,      // スタートに戻る
-  ePause_Num,      // 本項目の数
-} ePause;
-
-typedef enum {
-  eResult_Restart, // やりなおす
-  eResult_End,     // スタートに戻る
-  eResult_Num,     // 本項目の数
-} eResult;
-
 class Player {
   private:
-    Field *field;
-    Mino *mino;
-    Mino *ghost_mino;
-    StaticMino *hold_mino;
-    StaticMino *next_mino[NEXT_REFER_SIZE];
-
-    MinoRow row;
-
-    bool can_control;
+    BaseScene* gameManager;
+    Field field;
+    Mino mino;
+    Mino ghost;
+    StaticMino hold;
+    vector<StaticMino> next;
+    Bag bag = Bag();
 
     // 画像・フォントハンドル
     int background_handle;
@@ -40,62 +30,55 @@ class Player {
     Sound sound;
 
     // 座標
-    int x, y;
-    int gnrt_mx, gnrt_my;
-    int pre_mino_coordx;
-    int pre_mino_coordy;
+    Coordinates global;
+    Coordinates generate_place;
+    Coordinates pre_mino_place;
+    Coordinates bottom;
 
     // スコア
     int level;
     int score;
     int ren_num;
-    int drop_speed;
-    const int max_linenum = 100;
+    const int max_lines = 100;
 
     // オートリピート
-    int t;
     int lockdown_count;
     int autorepeat_count;
-    bool isautorepeat;
-
-    // mino生成フラグ
-    int new_gnrt_mino;
-    bool isbottom;
-    bool can_generate;
-    bool can_transcribe;
-    bool can_incrrow;
+    bool is_autorepeat;
 
     // ライン削除
     int erase_linenum;
     int levelup_count;
-    int sum_linenum;
+    int total_lines;
     int shift_count;
 
     // ホールド
-    int hold_mino_num;
-    bool hold_enable;
+    bool can_hold;
+
+    bool can_control;
 
     // private関数
-    void controlMino();
-    void moveMino(bool is_right);
-    void dropMino();
-    void holdMino();
-    void makeGhost();
-    void setNext();
-    void levelControl();
-    void installMino();
-    int eraseAndShitLine();
+    void generate_mino(shared_ptr<BlockId>, bool);
+    void make_ghost();
+    void set_next();
+    void level_control();
+    int judge_game();
 
   public:
-    Player();
-    Player(int x, int y);
+    int drop_speed;
 
-    void initialize();
-    void update();
+    Player(BaseScene* gameManager, Coordinates global);
+
+    void init();
+    int update(bool key_pressed);
     void draw();
     void finalize();
 
-    void startProcess();
-    int judgeGameResult();
-    int calcScore(int _level, int _drop_speed);
+    void start_game();
+    void rotate_mino(bool is_right);
+    void move_mino(bool is_right);
+    void hard_drop();
+    void soft_drop();
+    void hold_mino();
+    int calc_score();
 };

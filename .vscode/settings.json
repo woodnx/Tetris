@@ -71,7 +71,10 @@
     "xtr1common": "cpp",
     "xtree": "cpp",
     "xutility": "cpp",
-    "array": "cpp"
+    "array": "cpp",
+    "unordered_map": "cpp",
+    "random": "cpp",
+    "xhash": "cpp"
   },
   "editor.formatOnSave": true
 }

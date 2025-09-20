@@ -6,11 +6,12 @@
 
 class StaticMino : public Blocks {
   public:
-    StaticMino(int x, int y);
-    StaticMino(int x, int y, unsigned int size);
-    virtual void initialize();
-    void generateMino(int generate_mino_num);
+    StaticMino(Coordinates global);
+    StaticMino(Coordinates global, unsigned int size);
+    virtual void init();
+    shared_ptr<BlockId> id();
+    void generate(shared_ptr<BlockId> generate_mino_id);
 
   protected:
-    int num = -1; // each Mino unique number
+    shared_ptr<BlockId> _id = BlockId::Null; // each Mino unique number
 };

@@ -1,31 +1,33 @@
 #include "Blocks.h"
 
 Blocks::Blocks(
-    Position window, unsigned int width, unsigned int height, unsigned int size
-) {
-  this->_width = width, this->_height = height;
-  this->_size  = size;
-  this->window = window;
-  rotate_dir   = 0;
-
+  Coordinates global,
+  unsigned int width,
+  unsigned int height,
+  unsigned int size):
+    global(global),
+    _width(width),
+    _height(height),
+    _size(size),
+    rotate_dir(0) {
   layout.resize(height);
   for (int i = 0; i < height; i++) {
     layout.at(i).resize(width);
   }
 }
 
-int Blocks::rotate(bool right_flag) {
+int Blocks::rotate(bool is_right) {
   if (layout.size() == 0)
     return -1;
 
   int x, y;
   int X = 0, Y = 0;
-  int lr                  = right_flag ? -1 : 1;
-  float a                 = (this->_width - 1) / 2.0;
-  float b                 = (this->_height - 1) / 2.0;
-  vector<vector<int>> tmp = this->layout;
+  int lr  = is_right ? -1 : 1;
+  float a = (this->_width - 1) / 2.0;
+  float b = (this->_height - 1) / 2.0;
 
-  fillLayout(0);
+  vector<vector<shared_ptr<BlockId>>> tmp = copy_layout();
+  fill_layout(BlockId::Empty);
 
   for (y = 0; y < _height; y++) {
     for (x = 0; x < _width; x++) {
@@ -47,13 +49,12 @@ int Blocks::rotate(bool right_flag) {
       layout[y][x] = tmp[Y][X];
     }
   }
-  if (right_flag) {
+  if (is_right) {
     rotate_dir++;
     if (rotate_dir >= 4) {
       rotate_dir = rotate_dir % 4;
     }
-  }
-  else {
+  } else {
     rotate_dir--;
     if (rotate_dir <= -1) {
       rotate_dir = (4 + rotate_dir) % 4;
@@ -75,9 +76,7 @@ unsigned int Blocks::block_size() {
   return _size;
 }
 
-int Blocks::initLayout(unsigned int width, unsigned int height) {
-  if (width <= 0 || height <= 0 || layout.empty())
-    return -1;
+void Blocks::init_layout(unsigned int width, unsigned int height) {
   this->_width  = width;
   this->_height = height;
 
@@ -86,42 +85,34 @@ int Blocks::initLayout(unsigned int width, unsigned int height) {
     layout.at(i).resize(width);
   }
 
-  return 0;
+  fill_layout(BlockId::Empty);
 }
 
-int Blocks::fillLayout(int value) {
-  if (_width <= 0 || _height <= 0 || layout.empty())
-    return -1;
-
+void Blocks::fill_layout(shared_ptr<BlockId> fill_id) {
   for (int i = 0; i < layout.size(); i++) {
     for (int j = 0; j < layout.at(0).size(); j++) {
-      layout[i][j] = value;
+      layout[i][j] = fill_id;
     }
   }
-  return 0;
 }
 
-int Blocks::selectColor(int color_num) {
-  switch (color_num) {
-    case Imino:
-      return GetColor(0, 191, 255);
-    case Lmino:
-      return GetColor(255, 165, 0);
-    case Jmino:
-      return GetColor(65, 105, 225);
-    case Smino:
-      return GetColor(50, 205, 50);
-    case Zmino:
-      return GetColor(255, 99, 71);
-    case Omino:
-      return GetColor(0xff, 0xff, 0x66);
-    case Tmino:
-      return GetColor(218, 112, 214);
-    default:
-      return -1;
-      break;
+vector<vector<shared_ptr<BlockId>>> Blocks::copy_layout() {
+  vector<vector<shared_ptr<BlockId>>> l;
+
+  l.resize(_height);
+  for (int i = 0; i < _height; i++) {
+    l.at(i).resize(_width);
+    for (int j = 0; j < layout.at(0).size(); j++) {
+      l[i][j] = BlockId::Empty;
+    }
   }
-  return 0;
+
+  for (int y = 0; y < _height; y++) {
+    for (int x = 0; x < _width; x++) {
+      l[y][x] = layout[y][x];
+    }
+  }
+  return l;
 }
 
 int Blocks::draw(bool fill_flag) {
@@ -132,13 +123,16 @@ int Blocks::draw(bool fill_flag) {
 
   for (i = 0; i < _height; i++) {
     for (j = 0; j < _width; j++) {
-      if (this->layout[i][j] > Empty) {
-        int color = selectColor(layout[i][j]);
+      // Draw only non-empty cells (compare by id, not pointer identity)
+      if (layout[i][j] && layout[i][j]->id > BlockId::Empty->id) {
+        int color = layout[i][j]->color();
         DrawBox(
-            window.x + _size * j, window.y + _size * i,
-            window.x + _size * (j + 1) - 1, window.y + _size * (i + 1) - 1,
-            color, fill_flag
-        );
+          global.x + _size * j,
+          global.y + _size * i,
+          global.x + _size * (j + 1) - 1,
+          global.y + _size * (i + 1) - 1,
+          color,
+          fill_flag);
       }
     }
   }
@@ -153,14 +147,16 @@ int Blocks::draw(bool fill_flag, int alpha) {
 
   for (i = 0; i < _height; i++) {
     for (j = 0; j < _width; j++) {
-      if (this->layout[i][j] > 0) {
-        int color = selectColor(layout[i][j]);
+      if (layout[i][j]->id > BlockId::Empty->id) {
+        int color = layout[i][j]->color();
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
         DrawBox(
-            window.x + _size * j, window.y + _size * i,
-            window.x + _size * (j + 1) - 1, window.y + _size * (i + 1) - 1,
-            color, fill_flag
-        );
+          global.x + _size * j,
+          global.y + _size * i,
+          global.x + _size * (j + 1) - 1,
+          global.y + _size * (i + 1) - 1,
+          color,
+          fill_flag);
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードをオフ
       }
     }

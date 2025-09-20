@@ -1,13 +1,23 @@
 #include "BaseScene.h"
 
-BaseScene::BaseScene(ISceneChanger *changer): mImageHandle(0) {
-  mSceneChanger = changer;
+BaseScene::BaseScene(ISceneChanger* changer): mSceneChanger(changer) {}
+
+void BaseScene::Initialize() {}
+
+void BaseScene::Finalize() {}
+
+void BaseScene::Update() {
+  _frame_count++;
+
+  if (_frame_count >= FRAME_COUNT_LIMIT) {
+    _frame_count = -1;
+  }
 }
 
-void BaseScene::Finalize() {
-  DeleteGraph(mImageHandle);
+int BaseScene::frame_count() {
+  return _frame_count;
 }
 
-void BaseScene::Draw() {
-  DrawGraph(0, 0, mImageHandle, FALSE);
+void BaseScene::reset_frame_count() {
+  _frame_count = -1;
 }

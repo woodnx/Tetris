@@ -15,10 +15,10 @@
 int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hinst2, LPSTR lps, int nCmd) {
   SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
   ChangeWindowMode(TRUE), DxLib_Init(),
-      SetDrawScreen(DX_SCREEN_BACK); // ウィンドウモード変更と初期化と裏画面設定
+    SetDrawScreen(DX_SCREEN_BACK); // ウィンドウモード変更と初期化と裏画面設定
 
   SetGraphMode(WINDOW_SIZE_X, WINDOW_SIZE_Y, 32);
-  AddFontResourceEx((TCHAR *) "fonts/nicokaku_v1.ttf", FR_PRIVATE, NULL);
+  AddFontResourceEx((TCHAR*) "fonts/nicokaku_v1.ttf", FR_PRIVATE, NULL);
   // ChangeFont("ニコ角", DX_CHARSET_DEFAULT);
   // AddFontResourceEx("fonts/Ronde-B_square.otf", FR_PRIVATE, NULL);
   // ChangeFont("ロンド B スクエア", DX_CHARSET_DEFAULT);
