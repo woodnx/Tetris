@@ -11,6 +11,6 @@ enum eScene {
 // シーンを変更するためのインターフェイスクラス
 class ISceneChanger {
   public:
-    virtual ~ISceneChanger() = 0;
-    virtual void ChangeScene(eScene NextScene) = 0; // 指定シーンに変更する
+    virtual ~ISceneChanger()                     = 0;
+    virtual void change_scene(eScene next_scene) = 0; // 指定シーンに変更する
 };

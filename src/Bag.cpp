@@ -1,12 +1,12 @@
 #include "Bag.h"
 
 Bag::Bag() {
-  bag.resize(Bag::BAG_SIZE);
+  bag.resize(BAG_SIZE);
   // すべて Empty で初期化（nullptr を残さない）
   fill(bag.begin(), bag.end(), BlockId::Empty);
 
-  joinNexts(0);
-  joinNexts(TOTAL_MINOS);
+  join_nexts(0);
+  join_nexts(TOTAL_MINOS);
 }
 
 shared_ptr<BlockId> Bag::increase() {
@@ -17,18 +17,18 @@ shared_ptr<BlockId> Bag::increase() {
   }
   bag[BAG_SIZE - 1] = BlockId::Empty;
 
-  if (countNexts() <= NEXT_REFERS) {
-    joinNexts(NEXT_REFERS);
+  if (count_nexts() <= NEXT_REFERS) {
+    join_nexts(NEXT_REFERS);
   }
 
   return head;
 }
 
-shared_ptr<BlockId> Bag::getMinoId(int index) {
+shared_ptr<BlockId> Bag::get_mino_id(int index) {
   return bag[index];
 }
 
-vector<shared_ptr<BlockId>> Bag::generateBlockIds() {
+vector<shared_ptr<BlockId>> Bag::generate_block_ids() {
   vector<shared_ptr<BlockId>> b = vector<shared_ptr<BlockId>>(TOTAL_MINOS);
 
   for (int i = 0; i < TOTAL_MINOS; i++) {
@@ -37,8 +37,8 @@ vector<shared_ptr<BlockId>> Bag::generateBlockIds() {
   return b;
 }
 
-vector<shared_ptr<BlockId>> Bag::generateShuffledNexts() {
-  vector<shared_ptr<BlockId>> b = generateBlockIds();
+vector<shared_ptr<BlockId>> Bag::generate_shuffled_nexts() {
+  vector<shared_ptr<BlockId>> b = generate_block_ids();
 
   // Fisher–Yates: j は [0, i]
   for (int i = static_cast<int>(b.size()) - 1; i > 0; --i) {
@@ -55,7 +55,7 @@ int Bag::random(int max) {
   return dist(gen);
 }
 
-int Bag::countNexts() {
+int Bag::count_nexts() {
   int sum = 0;
   for (int i = 0; i < BAG_SIZE; i++) {
     // nullptr も Empty と同義で数えない
@@ -65,8 +65,8 @@ int Bag::countNexts() {
   return sum;
 }
 
-void Bag::joinNexts(int pivot) {
-  vector<shared_ptr<BlockId>> newNexts = generateShuffledNexts();
+void Bag::join_nexts(int pivot) {
+  vector<shared_ptr<BlockId>> newNexts = generate_shuffled_nexts();
   // 入る分だけ詰める（超えたら打ち切り）
   int end = min<int>(BAG_SIZE, pivot + static_cast<int>(newNexts.size()));
   for (int i = pivot; i < end; i++) {

@@ -52,15 +52,15 @@ class OnePlayerGame : public BaseScene {
 
   public:
     OnePlayerGame(ISceneChanger* changer);
-    void Initialize() override;
-    void Update() override;
-    void Draw() override;
-    void Finalize() override;
+    void initialize() override;
+    void update() override;
+    void draw() override;
+    void finalize() override;
 
-    void countDown();
-    void countDownDraw();
+    void count_down();
+    void count_down_draw();
     void pause();
-    void pauseDraw();
-    void gameResultScene();
-    void gameResultDraw(int);
+    void pause_draw();
+    void game_result_scene();
+    void game_result_draw(int);
 };

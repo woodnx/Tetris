@@ -15,13 +15,13 @@ class Bag {
     inline static int const NEXT_REFERS = 6;
     Bag();
     shared_ptr<BlockId> increase();
-    shared_ptr<BlockId> getMinoId(int index);
+    shared_ptr<BlockId> get_mino_id(int index);
 
   private:
     vector<shared_ptr<BlockId>> bag;
-    vector<shared_ptr<BlockId>> generateBlockIds();
-    vector<shared_ptr<BlockId>> generateShuffledNexts();
+    vector<shared_ptr<BlockId>> generate_block_ids();
+    vector<shared_ptr<BlockId>> generate_shuffled_nexts();
     int random(int);
-    int countNexts();
-    void joinNexts(int);
+    int count_nexts();
+    void join_nexts(int);
 };

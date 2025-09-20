@@ -1,15 +1,15 @@
 #include "BaseScene.h"
 
-BaseScene::BaseScene(ISceneChanger* changer): mSceneChanger(changer) {}
+BaseScene::BaseScene(ISceneChanger* changer): scene_changer(changer) {}
 
-void BaseScene::Initialize() {}
+void BaseScene::initialize() {}
 
-void BaseScene::Finalize() {}
+void BaseScene::finalize() {}
 
-void BaseScene::Update() {
+void BaseScene::update() {
   _frame_count++;
 
-  if (_frame_count >= FRAME_COUNT_LIMIT) {
+  if (_frame_count >= frame_count_limit) {
     _frame_count = -1;
   }
 }

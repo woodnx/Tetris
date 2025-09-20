@@ -130,7 +130,7 @@ void Player::make_ghost() {
 
 void Player::set_next() {
   for (int i = 0; i < Bag::NEXT_REFERS; i++) {
-    next[i].generate(bag.getMinoId(i));
+    next[i].generate(bag.get_mino_id(i));
   }
 }
 

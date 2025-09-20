@@ -23,14 +23,14 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hinst2, LPSTR lps, int nCmd) {
   // AddFontResourceEx("fonts/Ronde-B_square.otf", FR_PRIVATE, NULL);
   // ChangeFont("ロンド B スクエア", DX_CHARSET_DEFAULT);
   SceneMgr sceneMgr;
-  sceneMgr.Initialize();
+  sceneMgr.initialize();
 
   // メイン処理
   //  while( 裏画面を表画面に反映, メッセージ処理, 画面クリア, キーの状態更新)
   while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0 &&
          gpUpdateKey() == 0) {
-    sceneMgr.Update(); // 更新
-    sceneMgr.Draw();   // 描画
+    sceneMgr.update(); // 更新
+    sceneMgr.draw();   // 描画
   }
 
   DxLib_End(); // DXライブラリ終了処理

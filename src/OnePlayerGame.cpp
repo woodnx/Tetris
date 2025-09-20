@@ -34,7 +34,7 @@ OnePlayerGame::OnePlayerGame(ISceneChanger* changer):
   highscore = stoi(data);*/
 }
 
-void OnePlayerGame::Initialize() {
+void OnePlayerGame::initialize() {
   player.init();
 
   key_pressed = false;
@@ -54,7 +54,7 @@ void OnePlayerGame::Initialize() {
   is_gameclear = false;
 }
 
-void OnePlayerGame::Update() {
+void OnePlayerGame::update() {
   if (Key[KEY_INPUT_ESCAPE] == 1 && !is_count) {
     sound.play("pause", DX_PLAYTYPE_BACK);
     is_count = false;
@@ -62,11 +62,11 @@ void OnePlayerGame::Update() {
   }
 
   if (is_count)
-    countDown();
+    count_down();
   else if (is_pause)
     pause();
   else if (game_result != 0)
-    gameResultScene();
+    game_result_scene();
   else {
     if (Key[KEY_INPUT_A] >= 1) {
       player.move_mino(false);
@@ -102,25 +102,25 @@ void OnePlayerGame::Update() {
     game_result = player.update(key_pressed);
   }
 
-  BaseScene::Update();
+  BaseScene::update();
 }
 
-void OnePlayerGame::Draw() {
+void OnePlayerGame::draw() {
   player.draw();
 
   if (is_count)
-    countDownDraw();
+    count_down_draw();
   else if (is_pause)
-    pauseDraw();
+    pause_draw();
   else if (game_result)
-    gameResultDraw(game_result);
+    game_result_draw(game_result);
 }
 
-void OnePlayerGame::Finalize() {
+void OnePlayerGame::finalize() {
   player.finalize();
 }
 
-void OnePlayerGame::countDown() {
+void OnePlayerGame::count_down() {
   if (frame_count() % 60 == 0) {
     // sound.play("count", DX_PLAYTYPE_BACK);
     count--;
@@ -138,7 +138,7 @@ void OnePlayerGame::countDown() {
   }
 }
 
-void OnePlayerGame::countDownDraw() {
+void OnePlayerGame::count_down_draw() {
   SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
   DrawBox(0, 0, WINDOW_SIZE_X - 1, WINDOW_SIZE_Y - 1, GetColor(0, 0, 0), TRUE);
   SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードをオフ
@@ -177,17 +177,17 @@ void OnePlayerGame::pause() {
         is_pause = false;
         break;
       case ePause_Restart:
-        Initialize();
+        initialize();
         player.init();
         break;
       case ePause_End: // 設定選択中なら
-        mSceneChanger->ChangeScene(eScene_Menu);
+        scene_changer->change_scene(eScene_Menu);
         break;
     }
   }
 }
 
-void OnePlayerGame::pauseDraw() {
+void OnePlayerGame::pause_draw() {
   SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
   DrawBox(0, 0, WINDOW_SIZE_X - 1, WINDOW_SIZE_Y - 1, GetColor(0, 0, 0), TRUE);
   SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードをオフ
@@ -231,7 +231,7 @@ void OnePlayerGame::pauseDraw() {
     pause_font);
 }
 
-void OnePlayerGame::gameResultScene() {
+void OnePlayerGame::game_result_scene() {
   sound.stop("bgm");
   sound.play("menuBGM", DX_PLAYTYPE_BACK);
   if (Key[KEY_INPUT_S] == 1) { // 下キーが押されていたら
@@ -247,17 +247,17 @@ void OnePlayerGame::gameResultScene() {
     sound.play("dicision", DX_PLAYTYPE_BACK);
     switch (now_select) {
       case eResult_Restart:
-        Initialize();
+        initialize();
         player.init();
         break;
       case eResult_End:
-        mSceneChanger->ChangeScene(eScene_Menu);
+        scene_changer->change_scene(eScene_Menu);
         break;
     }
   }
 }
 
-void OnePlayerGame::gameResultDraw(int game_result) {
+void OnePlayerGame::game_result_draw(int game_result) {
   SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
   DrawBox(0, 0, WINDOW_SIZE_X - 1, WINDOW_SIZE_Y - 1, GetColor(0, 0, 0), TRUE);
   SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンドモードをオフ
