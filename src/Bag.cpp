@@ -2,7 +2,6 @@
 
 Bag::Bag() {
   bag.resize(BAG_SIZE);
-  // すべて Empty で初期化（nullptr を残さない）
   fill(bag.begin(), bag.end(), BlockId::Empty);
 
   join_nexts(0);
@@ -40,7 +39,6 @@ vector<shared_ptr<BlockId>> Bag::generate_block_ids() {
 vector<shared_ptr<BlockId>> Bag::generate_shuffled_nexts() {
   vector<shared_ptr<BlockId>> b = generate_block_ids();
 
-  // Fisher–Yates: j は [0, i]
   for (int i = static_cast<int>(b.size()) - 1; i > 0; --i) {
     int j = this->random(i);
     swap(b[i], b[j]);
@@ -58,7 +56,6 @@ int Bag::random(int max) {
 int Bag::count_nexts() {
   int sum = 0;
   for (int i = 0; i < BAG_SIZE; i++) {
-    // nullptr も Empty と同義で数えない
     if (bag[i] && bag[i] != BlockId::Empty)
       sum++;
   }
@@ -67,7 +64,6 @@ int Bag::count_nexts() {
 
 void Bag::join_nexts(int pivot) {
   vector<shared_ptr<BlockId>> newNexts = generate_shuffled_nexts();
-  // 入る分だけ詰める（超えたら打ち切り）
   int end = min<int>(BAG_SIZE, pivot + static_cast<int>(newNexts.size()));
   for (int i = pivot; i < end; i++) {
     bag[i] = newNexts[i - pivot];
