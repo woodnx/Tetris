@@ -8,4 +8,4 @@ include
 */Log.txt
 
 obj
-game.exe
+*.exe
