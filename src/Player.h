@@ -61,7 +61,7 @@ class Player {
     void generate_mino(shared_ptr<BlockId>, bool);
     void make_ghost();
     void set_next();
-    void level_control();
+    void calc_score_and_level();
     int judge_game();
 
   public:
@@ -80,5 +80,4 @@ class Player {
     void hard_drop();
     void soft_drop();
     void hold_mino();
-    int calc_score();
 };

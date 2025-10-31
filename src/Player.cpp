@@ -92,6 +92,7 @@ void Player::rotate_mino(bool is_right) {
 }
 
 void Player::hard_drop() {
+  pre_mino_place = mino.global_coord();
   mino.hard_drop();
   generate_mino(bag.increase(), true);
   can_hold = true;
@@ -143,24 +144,20 @@ void Player::generate_mino(shared_ptr<BlockId> mino_id, bool is_transcribe) {
   set_next();
 }
 
-int Player::calc_score() {
-  int _score = 0;
-
+void Player::calc_score_and_level() {
   int tmp_erase_lines = erase_linenum;
-  erase_linenum       = field.erase_lines();
+  int erase_linenum   = field.erase_lines();
+  int mino_place_height =
+    FIELD_SIDE_Y - field.global_to_local(pre_mino_place).y;
 
   if (tmp_erase_lines != 0 && erase_linenum != 0)
     ren_num++;
 
-  int drop_score = (20 * drop_speed / 60 - gameManager->frame_count() / 60);
+  int drop_score = drop_speed / 60 * mino_place_height;
   int line_score = level * 100 * erase_linenum;
 
-  _score = (drop_score + line_score) * (ren_num + 1);
+  score += (drop_score + line_score) * (ren_num + 1);
 
-  return _score;
-}
-
-void Player::level_control() {
   int tmp_level = level;
   total_lines += erase_linenum;
   level = total_lines / 10 + 1;
@@ -205,9 +202,8 @@ int Player::update(bool key_pressed) {
     }
     lockdown_count++;
   }
-
   make_ghost();
-  calc_score();
+  calc_score_and_level();
 
   return judge_game();
 }
