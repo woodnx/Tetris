@@ -8,7 +8,7 @@ BlockId::BlockId(int id, const std::string& name, int r, int g, int b):
     b(b) {}
 
 const shared_ptr<BlockId> BlockId::Null =
-  make_shared<BlockId>(-1, "Null", 0, 0, 0);
+  make_shared<BlockId>(8, "Null", 0, 0, 0);
 const shared_ptr<BlockId> BlockId::Empty =
   make_shared<BlockId>(0, "Empty", 0, 0, 0);
 const shared_ptr<BlockId> BlockId::Imino =
