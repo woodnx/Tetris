@@ -1,6 +1,6 @@
 #include "Bag.h"
 
-Bag::Bag() {
+void Bag::init() {
   bag.resize(BAG_SIZE);
   fill(bag.begin(), bag.end(), BlockId::Empty);
 

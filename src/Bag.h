@@ -13,7 +13,7 @@ class Bag {
     inline static int const TOTAL_MINOS = 7;
     inline static int const BAG_SIZE    = TOTAL_MINOS * 2;
     inline static int const NEXT_REFERS = 6;
-    Bag();
+    void init();
     shared_ptr<BlockId> increase();
     shared_ptr<BlockId> get_mino_id(int index);
 
