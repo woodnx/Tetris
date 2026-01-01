@@ -25,10 +25,10 @@ class Field : public Blocks {
 
     void init();
 
-    bool judge_erasing(int line_index);
-    void erase_line(int line_index);
+    bool judge_clearable(int line_index);
+    void clear_line(int line_index);
     void shift_line(int line_index);
-    int erase_lines();
+    int clear_lines();
 
     Coordinates local_to_global(Coordinates local);
     Coordinates global_to_local(Coordinates global);

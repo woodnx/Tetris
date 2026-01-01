@@ -27,7 +27,7 @@ void Field::init() {
   }
 }
 
-bool Field::judge_erasing(int line_index) {
+bool Field::judge_clearable(int line_index) {
   for (int x = 1; x <= FIELD_SIDE_X; x++) {
     if (
       !layout[line_index][x] || layout[line_index][x]->id == BlockId::Empty->id)
@@ -36,7 +36,7 @@ bool Field::judge_erasing(int line_index) {
   return true;
 }
 
-void Field::erase_line(int line_index) {
+void Field::clear_line(int line_index) {
   for (int i = 1; i <= FIELD_SIDE_X; i++) {
     this->layout[line_index][i] = BlockId::Empty;
   }
@@ -56,11 +56,11 @@ void Field::shift_line(int line_index) {
   }
 }
 
-int Field::erase_lines() {
+int Field::clear_lines() {
   int erase_linenum = 0;
   for (int i = 1; i <= FIELD_SIDE_Y; i++) {
-    if (judge_erasing(i)) {
-      erase_line(i);
+    if (judge_clearable(i)) {
+      clear_line(i);
       shift_line(i);
       erase_linenum++;
     }
@@ -90,7 +90,7 @@ void Field::set_field_value(Coordinates local, shared_ptr<BlockId> value) {
 }
 
 bool Field::contain_mino(Coordinates local) {
-  if (this->layout[local.y][local.x]->id > BlockId::Empty->id)
+  if (this->layout[local.y][local.x]->id != BlockId::Empty->id)
     return true;
   else
     return false;
