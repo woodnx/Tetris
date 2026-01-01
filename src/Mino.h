@@ -5,6 +5,7 @@
 #include "StaticMino.h"
 #include "include.h"
 
+#include <array>
 #include <memory>
 
 #define LAYOUT_SIZE 4
@@ -26,10 +27,13 @@ class Mino : public StaticMino {
     bool collision(Coordinates diff);
 
     void rotate(bool right_flag);
-    bool super_rotate(int dir_old, bool right_flag);
+    bool super_rotate(int dir_old);
 
     void move(Coordinates d, bool with_collision = false);
     void hard_drop();
+
+    // 0: `no rotate`, 1: `normal rotate`, 2: `super rotate`
+    int check_t_spin();
 
     void transcribe();
     void draw_status();
@@ -37,4 +41,8 @@ class Mino : public StaticMino {
   private:
     Field& field;
     Coordinates local;
+
+    /* Tスピン関連 */
+    bool use_spin = false; // 回転使用フラグ
+    int last_srs  = 0;     // 最後に行ったSRSパターン(0-4)
 };

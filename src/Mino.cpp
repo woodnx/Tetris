@@ -8,11 +8,11 @@ Mino::Mino(Field& field):
 Mino& Mino::operator=(const Mino& other) {
   if (this != &other) {
     StaticMino::operator=(other);
-    // fieldは参照なのでそのまま
     this->local      = other.local;
     this->global     = other.global;
     this->rotate_dir = other.rotate_dir;
-    // ...他のメンバもコピー...
+    this->use_spin   = other.use_spin;
+    this->last_srs   = other.last_srs;
   }
   return *this;
 }
@@ -42,23 +42,26 @@ void Mino::rotate(bool is_right) {
 
   if (!tmp_mino.collision()) {
     Blocks::rotate(is_right);
-  } else if (tmp_mino.super_rotate(tmp_rota_dir, is_right)) {
+  } else if (tmp_mino.super_rotate(tmp_rota_dir)) {
     Blocks::rotate(is_right);
-    this->super_rotate(tmp_rota_dir, is_right);
+    this->super_rotate(tmp_rota_dir);
   }
+  use_spin = true;
 }
 
-bool Mino::super_rotate(int dir_old, bool is_right) {
-  // 参考（ほぼ丸パクリ）:http://www.terasol.co.jp/%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0/6335
-  // 参考２（Iミノ部分の実装）：https://tetrisch.github.io/main/srs.html
+// 参考1: http://www.terasol.co.jp/プログラミング/6335
+// 参考2：https://tetrisch.github.io/main/srs.html
+bool Mino::super_rotate(int dir_old) {
   int dx = 0, dy = 0;
-  int dir = this->rotate_dir;
+  int dir  = this->rotate_dir;
+  last_srs = 0;
 
   if (this->_id != BlockId::Imino) // Iミノ以外の場合
   {
     // 1. 軸を左右に動かす
     // 0が90度（B）の場合は左，-90度（D）の場合は右へ移動
     // 0が0度（A），180度（C）の場合は回転前の方向の逆方向へ移動
+    last_srs++;
     switch (dir) {
       case 1:
         dx = -1;
@@ -82,6 +85,7 @@ bool Mino::super_rotate(int dir_old, bool is_right) {
       // 2.その状態から軸を上下に動かす
       // 0が90度（B），-90度（D）の場合は上へ移動
       // 0が0度（A），180度（C）の場合は下へ移動
+      last_srs++;
       switch (dir) {
         case 1:
         case 3:
@@ -98,6 +102,7 @@ bool Mino::super_rotate(int dir_old, bool is_right) {
         // 0が0度（A），180度（C）の場合は上へ移動
         dx = 0;
         dy = 0;
+        last_srs++;
         switch (this->rotate_dir) {
           case 1:
           case 3:
@@ -112,6 +117,7 @@ bool Mino::super_rotate(int dir_old, bool is_right) {
           // 4.その状態から軸を左右に動かす
           // 0が90度（B）の場合は左，-90度（D）の場合は右へ移動
           // 0が0度（A），180度（C）の場合は回転した方向の逆へ移動
+          last_srs++;
           switch (dir) {
             case 1:
               dx = -1;
@@ -173,7 +179,8 @@ bool Mino::super_rotate(int dir_old, bool is_right) {
     if (this->collision(Coordinates(dx, dy))) {
       // 2. 軸を左右に動かす
       // 0が90度（B）の場合は左，-90度（D）の場合は右へ移動（枠にくっつく）
-      // 0が0度（A），180度（C）の場合は回転した方向へ移動 180度は２マス移動
+      // 0が0度（A），180度（C）の場合は回転した方向へ移動
+      // 180度は２マス移動
       switch (dir) {
         case 1:
           if (dir_old == 2)
@@ -313,6 +320,7 @@ void Mino::move(Coordinates d, bool with_collision) {
   } else if (!this->collision(d)) {
     this->move(d);
   }
+  use_spin = false;
 }
 
 void Mino::hard_drop() {
@@ -321,6 +329,44 @@ void Mino::hard_drop() {
   while (!this->collision(vector)) {
     this->move(vector);
   }
+}
+
+int Mino::check_t_spin() {
+  if (this->_id->id != BlockId::Tmino->id)
+    return 0;
+
+  array<Coordinates, 4> target = {
+    Coordinates(0, 0),
+    Coordinates(0, 2),
+    Coordinates(2, 2),
+    Coordinates(2, 0),
+  };
+  array<int, 2> t_spin_target_idx = {
+    (rotate_dir + 0) % 4,
+    (rotate_dir + 1) % 4,
+  };
+
+  int filled_count      = 0;
+  int filled_mini_count = 0;
+  for (int i = 0; i < 4; i++) {
+    if (field.contain_mino(target[i])) {
+      filled_count++;
+
+      // judging mini
+      if (i == t_spin_target_idx[0] || i == t_spin_target_idx[1]) {
+        filled_mini_count++;
+      }
+    }
+  }
+
+  if (filled_count >= 3 && use_spin)
+    return 1; // t-spin
+  else if (last_srs == 4)
+    return 1; // t-spin
+  else if (filled_mini_count == 2)
+    return 2; // t-spin mini
+  else
+    return 0;
 }
 
 bool Mino::collision() {
@@ -371,8 +417,8 @@ void Mino::transcribe() {
 
 void Mino::draw_status() {
   // DrawFormatString(250, 0, GetColor(255, 255, 255), "global.x:%d,
-  // global.y:%d", global.x, global.y); DrawFormatString(250, 20, GetColor(255,
-  // 255, 255), "local.x:%d, local.y:%d", local.x, local.y);
+  // global.y:%d", global.x, global.y); DrawFormatString(250, 20,
+  // GetColor(255, 255, 255), "local.x:%d, local.y:%d", local.x, local.y);
   DrawFormatString(
     250,
     30,

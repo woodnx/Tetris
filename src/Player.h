@@ -11,6 +11,10 @@
 #include "StaticMino.h"
 #include "include.h"
 
+#include <array>
+
+using namespace std;
+
 class Player {
   private:
     BaseScene* gameManager;
@@ -19,7 +23,7 @@ class Player {
     Mino ghost;
     StaticMino hold;
     vector<StaticMino> next;
-    Bag bag = Bag();
+    Bag bag;
 
     // 画像・フォントハンドル
     int background_handle;
@@ -35,37 +39,42 @@ class Player {
     Coordinates pre_mino_place;
     Coordinates bottom;
 
-    // スコア
+    // スコア・レベル管理
     int level;
     int score;
-    int ren_num;
-    const int max_lines = 100;
 
-    // オートリピート
+    int ren_count;
+    int max_lines = 100;
+
+    const array<int, 5> clear_line_table = {0, 100, 300, 500, 800};
+
+    bool is_back_to_back = false;
+    bool is_t_spin       = false;
+    int soft_drop_cells  = 0;
+    int hard_drop_cells  = 0;
+
     int lockdown_count;
     int autorepeat_count;
     bool is_autorepeat;
 
-    // ライン削除
-    int erase_linenum;
+    int clear_line_count;
     int levelup_count;
-    int total_lines;
+    int total_clear_lines;
     int shift_count;
 
-    // ホールド
     bool can_hold;
-
     bool can_control;
 
     // private関数
     void generate_mino(shared_ptr<BlockId>, bool);
     void make_ghost();
     void set_next();
+    int calc_t_spin_base(int t_spin_type, int cleared_lines);
     void calc_score_and_level();
     int judge_game();
 
   public:
-    int drop_speed;
+    int drop_speed = 60;
 
     Player(BaseScene* gameManager, Coordinates global);
 
