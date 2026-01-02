@@ -14,7 +14,7 @@ $(OBJ_DIR):
 	@if not exist "$(OBJ_DIR)" mkdir "$(OBJ_DIR)"
 
 game: $(OBJS)
-	$(CC) -std=c++17 -g -O0 -o game $(OBJS) \
+	$(CC) -std=c++17 -g -O0 -o game.exe $(OBJS) \
 		-L $(DXLIBDIR) \
 		-lDxLib\
 		-lDxUseCLib\
