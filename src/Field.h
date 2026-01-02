@@ -1,6 +1,10 @@
 #pragma once
+#include "BlockId.h"
 #include "Blocks.h"
 #include "DxLib.h"
+
+#include <memory>
+
 #define FIELD_SIDE_X  10
 #define FIELD_SIDE_Y  24
 #define FIELD_ASIDE_X FIELD_SIDE_X + 2
@@ -11,26 +15,30 @@ using namespace std;
 
 class Field : public Blocks {
   public:
-    Field(int x, int y);
+    // static const int FIELD_SIDE_X  = 10;
+    // static const int FIELD_SIDE_Y  = 24;
+    // static const int FIELD_ASIDE_X = FIELD_SIDE_X + 2;
+    // static const int FIELD_ASIDE_Y = FIELD_SIDE_Y + 2;
+    // static const int BLOCK_SIZE    = 30;
 
-    void initialize();
+    Field(Coordinates global);
 
-    bool judgeLineFull(int line_num);
-    void eraseLine(int line_num);
-    void shiftLine(int line_num);
-    virtual int LineEraseAndShift();
+    void init();
 
-    int elemXToCoordX(int elem_x);
-    int elemYToCoordY(int elem_y);
-    int coordXToElemX(int coord_x);
-    int coordYToElemY(int coord_y);
+    bool judge_clearable(int line_index);
+    void clear_line(int line_index);
+    void shift_line(int line_index);
+    int clear_lines();
 
-    int getFieldValue(int elem_x, int elem_y);
-    void setFieldValue(int elem_x, int elem_y, int value);
+    Coordinates local_to_global(Coordinates local);
+    Coordinates global_to_local(Coordinates global);
 
-    bool containMino(int elem_x, int elem_y);
+    shared_ptr<BlockId> get_field_value(Coordinates local);
+    void set_field_value(Coordinates local, shared_ptr<BlockId> value);
 
-    void drawField();
+    bool contain_mino(Coordinates local);
+
+    void draw();
 
   private:
     int color;

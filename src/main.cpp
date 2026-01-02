@@ -15,22 +15,30 @@
 int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hinst2, LPSTR lps, int nCmd) {
   SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
   ChangeWindowMode(TRUE), DxLib_Init(),
-      SetDrawScreen(DX_SCREEN_BACK); // ウィンドウモード変更と初期化と裏画面設定
+    SetDrawScreen(DX_SCREEN_BACK); // ウィンドウモード変更と初期化と裏画面設定
+
+  // 垂直同期を有効化（ちらつき抑制）
+  SetWaitVSyncFlag(TRUE);
 
   SetGraphMode(WINDOW_SIZE_X, WINDOW_SIZE_Y, 32);
-  AddFontResourceEx((TCHAR *) "fonts/nicokaku_v1.ttf", FR_PRIVATE, NULL);
+  AddFontResourceEx((TCHAR*) "fonts/nicokaku_v1.ttf", FR_PRIVATE, NULL);
   // ChangeFont("ニコ角", DX_CHARSET_DEFAULT);
   // AddFontResourceEx("fonts/Ronde-B_square.otf", FR_PRIVATE, NULL);
   // ChangeFont("ロンド B スクエア", DX_CHARSET_DEFAULT);
   SceneMgr sceneMgr;
-  sceneMgr.Initialize();
+  sceneMgr.initialize();
 
-  // メイン処理
-  //  while( 裏画面を表画面に反映, メッセージ処理, 画面クリア, キーの状態更新)
-  while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0 &&
-         gpUpdateKey() == 0) {
-    sceneMgr.Update(); // 更新
-    sceneMgr.Draw();   // 描画
+  // メイン処理: 1フレームの最後に ScreenFlip() するのが定石
+  while (ProcessMessage() == 0) {
+    SetDrawScreen(DX_SCREEN_BACK); // 念のため裏画面を明示
+    ClearDrawScreen();             // 画面をクリア
+    if (gpUpdateKey() != 0)
+      break; // 入力更新（エラーで抜ける）
+
+    sceneMgr.update(); // 更新
+    sceneMgr.draw();   // 描画
+
+    ScreenFlip(); // 裏画面→表画面
   }
 
   DxLib_End(); // DXライブラリ終了処理

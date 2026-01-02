@@ -6,4 +6,6 @@ lib
 include
 
 */Log.txt
-game.exe
+
+obj
+*.exe

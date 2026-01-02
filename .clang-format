@@ -1,14 +1,14 @@
 BasedOnStyle: LLVM
-AlignAfterOpenBracket: BlockIndent
+AlignAfterOpenBracket: AlwaysBreak
 AlignArrayOfStructures: Left
 AlignConsecutiveAssignments: Consecutive
 AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveDeclarations: None
 AlignConsecutiveMacros: Consecutive
 AlignEscapedNewlines: Left
-AlignOperands: Align
+AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
-AllowAllArgumentsOnNextLine: true
+AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
@@ -20,14 +20,17 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: No
-BinPackArguments: true
-BinPackParameters: true
+BinPackArguments: false
+BinPackParameters: false
 BitFieldColonSpacing: None
 BreakBeforeBinaryOperators: None
 BreakBeforeConceptDeclarations: false
 BreakBeforeTernaryOperators: false
+BreakConstructorInitializers: AfterColon
+BreakBeforeBraces: Attach
 BreakInheritanceList: AfterColon
 BreakStringLiterals: false
+ContinuationIndentWidth: 2
 IncludeBlocks: Regroup
 IndentAccessModifiers: true
 IndentCaseBlocks: false
@@ -38,7 +41,9 @@ IndentPPDirectives: BeforeHash
 IndentRequires: true
 IndentWidth: 2
 IndentWrappedFunctionNames: true
-PointerAlignment: Right
+PackConstructorInitializers: CurrentLine
+PenaltyBreakBeforeFirstCallParameter: 1
+PointerAlignment: Left
 SortIncludes: CaseSensitive
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: true
@@ -58,7 +63,6 @@ SpacesInConditionalStatement: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 UseTab: Never
-BreakBeforeBraces: Custom
 BraceWrapping:
   AfterCaseLabel: false
   AfterClass: false

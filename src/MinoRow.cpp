@@ -14,7 +14,7 @@ int MinoRow::increase() {
 
   // 配列のサイズがNEXT_REFER_SIZE 以下なら新しくarrを作成し，連結．
   if (mino_arr.size() < NEXT_REFER_SIZE) {
-    std::vector<int> add_arr;
+    vector<shared_ptr<BlockId>> add_arr;
     initRow(add_arr);
     shuffleRow(add_arr);
     mino_arr.insert(mino_arr.end(), add_arr.begin(), add_arr.end());
@@ -23,22 +23,23 @@ int MinoRow::increase() {
   return 0;
 }
 
-int MinoRow::getMinoNum(int refer_num) {
+shared_ptr<BlockId> MinoRow::getMinoNum(int refer_num) {
   return mino_arr[refer_num];
 }
 
-void MinoRow::initRow(std::vector<int> &arr) {
+void MinoRow::initRow(vector<shared_ptr<BlockId>>& arr) {
   arr.resize(ALL_MINO_NUM);
-  for (int i = 0; i < arr.size(); i++) {
-    arr[i] = i;
+  for (int i = 0; i < ALL_MINO_NUM; i++) {
+    shared_ptr<BlockId> id = BlockId::from_id(i + 1);
+    arr[i]                 = id;
   }
 }
 
-void MinoRow::shuffleRow(std::vector<int> &arr) {
+void MinoRow::shuffleRow(vector<shared_ptr<BlockId>>& arr) {
   for (int i = ALL_MINO_NUM - 1; i >= 0; i--) {
-    int r   = GetRand(ALL_MINO_NUM - 1);
-    int tmp = arr[i];
-    arr[i]  = arr[r];
-    arr[r]  = tmp;
+    int r                   = GetRand(ALL_MINO_NUM - 1);
+    shared_ptr<BlockId> tmp = arr[i];
+    arr[i]                  = arr[r];
+    arr[r]                  = tmp;
   }
 }
