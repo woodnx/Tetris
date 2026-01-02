@@ -90,7 +90,7 @@ void Field::set_field_value(Coordinates local, shared_ptr<BlockId> value) {
 }
 
 bool Field::contain_mino(Coordinates local) {
-  if (this->layout[local.y][local.x]->id != BlockId::Empty->id)
+  if (this->layout[local.y][local.x] != BlockId::Empty)
     return true;
   else
     return false;

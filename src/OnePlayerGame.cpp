@@ -82,7 +82,7 @@ void OnePlayerGame::update() {
     }
 
     if (Key[KEY_INPUT_L] == 1) {
-      player.rotate_mino(false);
+      player.rotate_mino(true);
     } else if (Key[KEY_INPUT_K] == 1) {
       player.rotate_mino(false);
     }

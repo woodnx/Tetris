@@ -20,6 +20,8 @@ Mino& Mino::operator=(const Mino& other) {
 void Mino::init() {
   fill_layout(BlockId::Empty);
   this->rotate_dir = 0;
+  this->use_spin   = false;
+  this->last_srs   = 0;
 }
 
 Coordinates Mino::global_coord() {
@@ -332,7 +334,7 @@ void Mino::hard_drop() {
 }
 
 int Mino::check_t_spin() {
-  if (this->_id->id != BlockId::Tmino->id)
+  if (this->_id != BlockId::Tmino)
     return 0;
 
   array<Coordinates, 4> target = {
