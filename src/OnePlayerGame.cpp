@@ -3,11 +3,11 @@
 OnePlayerGame::OnePlayerGame(ISceneChanger* changer):
     BaseScene(changer),
     player(this, Coordinates(380, 50)) {
-  sound.add("select", "sounds/カーソル移動2.mp3");
-  sound.add("dicision", "sounds/決定、ボタン押下26.mp3");
+  sound.add("select", "sounds/select.mp3");
+  sound.add("dicision", "sounds/dicision.mp3");
   sound.changeAllSoundVolume(70);
-  sound.add("count", "sounds/Countdown06-1.mp3");
-  sound.add("pause", "sounds/警告音1.mp3");
+  sound.add("count", "sounds/countdown.mp3");
+  sound.add("pause", "sounds/pause.mp3");
   sound.add("bgm", "sounds/tetlis2pi.mp3");
 
   // カウントダウン関連
@@ -96,7 +96,7 @@ void OnePlayerGame::update() {
     }
 
     if (frame_count() % player.drop_speed == 0) {
-      player.soft_drop();
+      player.soft_drop(false);
     }
 
     game_result = player.update(key_pressed);
@@ -121,8 +121,9 @@ void OnePlayerGame::finalize() {
 }
 
 void OnePlayerGame::count_down() {
+  if (count == 3)
+    sound.play("count", DX_PLAYTYPE_BACK);
   if (frame_count() % 60 == 0) {
-    // sound.play("count", DX_PLAYTYPE_BACK);
     count--;
   }
   if (count < 0) {
@@ -233,7 +234,6 @@ void OnePlayerGame::pause_draw() {
 
 void OnePlayerGame::game_result_scene() {
   sound.stop("bgm");
-  sound.play("menuBGM", DX_PLAYTYPE_BACK);
   if (Key[KEY_INPUT_S] == 1) { // 下キーが押されていたら
     sound.play("select", DX_PLAYTYPE_BACK);
     now_select = (now_select + 1) % eResult_Num; // 選択状態を一つ下げる
@@ -247,8 +247,7 @@ void OnePlayerGame::game_result_scene() {
     sound.play("dicision", DX_PLAYTYPE_BACK);
     switch (now_select) {
       case eResult_Restart:
-        initialize();
-        player.init();
+        scene_changer->change_scene(eScene_Normal);
         break;
       case eResult_End:
         scene_changer->change_scene(eScene_Menu);

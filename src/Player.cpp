@@ -20,11 +20,11 @@ Player::Player(BaseScene* gameManager, Coordinates global):
     CreateFontToHandle((TCHAR*) "ニコ角", 40, 1, DX_FONTTYPE_ANTIALIASING);
 
   // 各種サウンド
-  sound.add("move", "sounds/カーソル移動2.mp3");
-  sound.add("rotate", "sounds/決定、ボタン押下35.mp3");
-  sound.add("hold", "sounds/決定、ボタン押下40.mp3");
-  sound.add("drop", "sounds/カーソル移動7.mp3");
-  sound.add("levelup", "sounds/魔王魂 効果音 ワンポイント11.mp3");
+  sound.add("move", "sounds/move.mp3");
+  sound.add("rotate", "sounds/rotate.mp3");
+  sound.add("hold", "sounds/hold.mp3");
+  sound.add("drop", "sounds/hard_drop.mp3");
+  sound.add("levelup", "sounds/levelup.mp3");
   sound.changeAllSoundVolume(70);
   sound.changeVolume("rotate", 60);
 
@@ -84,7 +84,7 @@ void Player::move_mino(bool is_right) {
   } else if (is_autorepeat && gameManager->frame_count() % 3 == 0) {
     mino.move(vector, true);
     sound.play("move", DX_PLAYTYPE_BACK);
-  } else if (autorepeat_count == 9) {
+  } else if (autorepeat_count >= 9) {
     is_autorepeat = true;
   } else {
     autorepeat_count++;
@@ -93,25 +93,31 @@ void Player::move_mino(bool is_right) {
 
 void Player::rotate_mino(bool is_right) {
   mino.rotate(is_right);
+  sound.play("rotate", DX_PLAYTYPE_BACK);
   lockdown_count = 0;
 }
 
 void Player::hard_drop() {
   pre_mino_place = mino.global_coord();
   mino.hard_drop();
+  sound.play("drop", DX_PLAYTYPE_BACK);
+  hard_drop_cells += field.global_to_local(pre_mino_place).y - bottom.y;
+
   generate_mino(bag.increase(), true);
 
   can_hold = true;
-  hard_drop_cells += field.global_to_local(pre_mino_place).y - bottom.y;
 }
 
-void Player::soft_drop() {
+void Player::soft_drop(bool with_se) {
   Coordinates vector(0, 1);
 
-  if (gameManager->frame_count() % 2 == 0) {
+  if (gameManager->frame_count() % 3 == 0) {
     mino.move(vector, true);
-    sound.play("move", DX_PLAYTYPE_BACK);
+
     soft_drop_cells++;
+  }
+  if (with_se) {
+    sound.play("move", DX_PLAYTYPE_BACK);
   }
 }
 
@@ -147,6 +153,7 @@ void Player::set_next() {
 void Player::generate_mino(shared_ptr<BlockId> mino_id, bool is_transcribe) {
   if (is_transcribe) {
     mino.transcribe();
+    calc_score_and_level();
   }
   mino.generate(mino_id, generate_place);
 
@@ -239,7 +246,6 @@ int Player::update(bool key_pressed) {
     autorepeat_count = 0;
     is_autorepeat    = false;
   }
-  calc_score_and_level();
 
   if (mino.collision(bottom)) {
     if (lockdown_count >= 30) {

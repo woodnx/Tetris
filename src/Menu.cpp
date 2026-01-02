@@ -12,9 +12,9 @@ void Menu::initialize() {
 
   image_handle      = LoadGraph((TCHAR*) "images/rogo.png"); // 画像のロード
   background_handle = LoadGraph((TCHAR*) "images/Menu_Back.jpg");
-  select_se         = LoadSoundMem((TCHAR*) "sounds/カーソル移動2.mp3");
-  decision_se       = LoadSoundMem((TCHAR*) "sounds/決定、ボタン押下26.mp3");
-  menu_bgm          = LoadSoundMem((TCHAR*) "sounds/魔王魂  サイバー13.mp3");
+  select_se         = LoadSoundMem((TCHAR*) "sounds/select.mp3");
+  decision_se       = LoadSoundMem((TCHAR*) "sounds/dicision.mp3");
+  menu_bgm          = LoadSoundMem((TCHAR*) "sounds/menu.mp3");
   ChangeVolumeSoundMem(255 * 80 / 100, menu_bgm);
   PlaySoundMem(menu_bgm, DX_PLAYTYPE_BACK);
 }

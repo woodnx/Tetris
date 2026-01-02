@@ -87,6 +87,6 @@ class Player {
     void rotate_mino(bool is_right);
     void move_mino(bool is_right);
     void hard_drop();
-    void soft_drop();
+    void soft_drop(bool with_se = true);
     void hold_mino();
 };
